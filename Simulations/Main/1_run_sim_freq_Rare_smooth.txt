@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J rjob # A single job name for the array
+#SBATCH -c 1                # Number of cores
+#SBATCH -N 1                # Ensure that all cores are on one machine
+#SBATCH -t 0-04:00          # Runtime in D-HH:MM, minimum of 10 minutes
+#SBATCH -p shared          # Partition to submit to
+#SBATCH --mem=1000           # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH -o outerr/rjob_%j_%a.out  # File to which STDOUT will be written, %j inserts jobid
+#SBATCH -e outerr/rjob_%j_%a.err  # File to which STDERR will be written, %j inserts jobid
+
+# source spack
+. /n/holylfs05/LABS/nethery_lab/Users/svega/spack/share/spack/setup-env.sh
+
+# load spack packages
+spack load r-rstan
+spack load r-codetools
+spack load r-rcpp@1.0.10
+#spack load  r-rlang@1.1.0
+#spack load vctrs@0.6.0
+
+
+alpha=-7 # degree of rarity
+rho=.99 # degree of spatial correlation
+dir_out=\"/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/Main/Results\" # directory output path for results
+
+R CMD BATCH --quiet --no-save --no-restore '--args wd="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc" alpha='$alpha' rho='$rho' dir_out='$dir_out'' /n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/1_run_sim_freq_smooth.R Rout/1_run_sim_freq_Rare_smooth.Rout
+

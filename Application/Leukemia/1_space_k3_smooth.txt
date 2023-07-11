@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH -J rjob # A single job name for the array
+#SBATCH -c 1                # Number of cores
+#SBATCH -N 1                # Ensure that all cores are on one machine
+#SBATCH -t 5-00:00          # Runtime in D-HH:MM, minimum of 10 minutes
+#SBATCH -p intermediate   # Partition to submit to
+#SBATCH --mem=5000           # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH -o outerr/rjob_%j_%a.out  # File to which STDOUT will be written, %j inserts jobid
+#SBATCH -e outerr/rjob_%j_%a.err  # File to which STDERR will be written, %j inserts jobid
+
+# source spack
+. /n/holylfs05/LABS/nethery_lab/Users/svega/spack/share/spack/setup-env.sh
+
+# load spack packages
+spack load r-rstan
+spack load r-codetools
+spack load r-rcpp@1.0.10
+#spack load  r-rlang@1.1.0
+#spack load vctrs@0.6.0
+
+k=3 # number of latent factors  
+p=1 # number of covariates
+trt_year=1995 # treated year
+model=\"space\" # model
+data_path=\"~/cl_quasi_exp/data/Leukemia_1988_2003_0-9.RData\" # path to application data
+adj_mat_path=\"~/cl_quasi_exp/data/leukemia_adj_mat_1988_2003_0-9.RData\" # path to adjacency matrix
+dir_out=\"~/cl_quasi_exp/Application/Leukemia/Results\" # directory output path for results
+
+R CMD BATCH --quiet --no-save --no-restore '--args wd="/n/home01/svega/cl_quasi_exp" k='$k' p='$p' trt_year='$trt_year' model='$model' data_path='$data_path' adj_mat_path='$adj_mat_path' dir_out='$dir_out'' code/1_run_models_smooth.R Rout/1_run_models_space_out_smooth_k3.Rout
+
