@@ -25,7 +25,7 @@ for (i in 1:length(args)) { eval (parse (text = args[[i]] )) }
 #dir_out = dir_out
 
 # For testing
-years <- c(1983:2003)
+#years <- c(1983:2003)
 
 # Load packages
 library(rstan)
@@ -55,32 +55,32 @@ load(adj_mat_path)
 
 # Vanilla Model
 if(model == 'vanilla'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_stan_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/Vanilla_cov.stan",auto_write=F)
 }
 
 # Space Model
 if(model == 'space'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_spatial_stan_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/Space_cov.stan",auto_write=F)
 }
 
 # Space-Time ICAR Model
 if(model == 'ICAR'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_spatio-temporal_STAN_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SpaceTimeICAR_cov.stan",auto_write=F)
 }
 
 # Space-Time AR Model
 if(model == 'AR'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_spatio-temporal_AR_STAN_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SpaceTimeAR_cov.stan",auto_write=F)
 }
 
 # Space-Time Lasso Model
 if(model == 'lasso'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_spatio-temporal_lasso_STAN_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SpaceTimeLasso_cov.stan",auto_write=F)
 }
 
 # Space-Time Shrinkage Model
 if(model == 'shrink'){
-  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SV_spatio-comb-temp-shrinkage_STAN_cov_v2.stan",auto_write=F)
+  stan_mod <- stan_model("~/cl_quasi_exp/STAN Models/SpaceTimeShrinkage_cov.stan",auto_write=F)
 }
 
 #######################

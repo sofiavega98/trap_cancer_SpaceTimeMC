@@ -38,12 +38,12 @@ source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/0_s
 ## 1. Load Models 1-6 ##
 ########################
 
-original_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_stan.stan",auto_write=F)
-space_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_spatial_stan_v3.stan",auto_write=F)
-space_time_ICAR_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_spatio-temporal_STAN_v3.stan",auto_write=F)
-space_time_AR_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_spatio-temporal_AR_STAN_v3.stan",auto_write=F)
-space_comb_time_shrink_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_spatio-comb-temp-shrinkage_STAN_v3.stan",auto_write=F)
-lasso_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SV_spatio-temporal_lasso_STAN.stan",auto_write=F)
+original_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/Vanilla.stan",auto_write=F)
+space_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/Space_altPrior.stan",auto_write=F)
+space_time_ICAR_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SpaceTimeICAR_altPrior.stan",auto_write=F)
+space_time_AR_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SpaceTimeAR_altPrior.stan",auto_write=F)
+space_comb_time_shrink_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SpaceTimeShrinkage_altPrior.stan",auto_write=F)
+lasso_mod <- stan_model("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/STAN Models/SpaceTimeLasso.stan",auto_write=F)
 
 #######################
 ## 2. Set parameters ##
