@@ -48,11 +48,9 @@ model {
   // the following computes the prior on FS on the unit scale with sd = 1
   for (i in 1:k) {
     target += -(0.5 * tau_ICAR^2) * dot_self((FS[s_node1,i])' - (FS[s_node2,i])');
-    //print(target());
-    //target += target() - target();// didn't work
+
   }
-  //target += -0.5 * columns_dot_self(FS[node1,1:k] - FS[node2,1:k]);
-  //real log_p;
+
   
   for (i in 1:k){
     L[,i] ~ normal(0,1);

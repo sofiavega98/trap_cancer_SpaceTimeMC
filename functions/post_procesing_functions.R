@@ -196,7 +196,6 @@ diff_post_obs_rate <- function(Y0_matrix,Mu_trt,pop_trt){
 }
 
 diff_post_obs <- function(Y0_matrix,Mu_trt,pop_trt){
-  ## k = 3
   full_diff_list_1_3 <- list() #initialize list of differences for 45 samples
   full_rate_list_1_3 <- list() #initialize list of rates of differences for 45 samples
   for(i in 1:ncol(Y0_matrix)) {
@@ -204,15 +203,6 @@ diff_post_obs <- function(Y0_matrix,Mu_trt,pop_trt){
     full_rate_list_1_3[[i]] <- 100000 * sweep(full_diff_list_1_3[[i]],2,pop_trt,"/")  #difference/population each is 1000x90
   }
   
-  ## k = 7
-  #full_diff_list_1_7 <- list() #initialize list of differences for 45 samples
-  #full_rate_list_1_7 <- list() #initialize list of rates of differences for 45 samples
-  #for(i in 1:ncol(Y0_matrix)) {
-  #  full_diff_list_1_7[[i]] <- sweep(Mu_trt[[i]][[2]],2,Y0_matrix[,i]) #posterior samples - observed Y0 values
-  # full_rate_list_1_7[[i]] <- 100000 * sweep(full_diff_list_1_7[[i]],2,pop_trt,"/")  #difference/population each is 1000x90
-  #}
-  
-  #return(list(full_rate_list_1_3,full_rate_list_1_7))
   return(full_diff_list_1_3)
   
 }
@@ -752,189 +742,6 @@ plot_avg_perc_bias_gsc_log <- function(ori_3,space_3,spacetime_ICAR_3,spacetime_
 }
 #------------------------------------------------------------------------------------------------------------------
 
-#### CIs and coverage function:
-
-CI.coverage<- function(Mu_trt,Y1_matrix,Y0_matrix,pop_trt,true_trt_rate, ind){
-  med_list <- list()
-  perc_bias_list <- list()
-  avg_perc_bias <- list()
-  ci_bounds_list <- matrix(NA,nrow=ncol(Y1_matrix),ncol=2)
-  ci_width <- c()
-  true_trt_rate_list <- list()
-  covers <- c()
-  for(i in 1:ncol(Y1_matrix)) {
-    full_diff <- -1*sweep(Mu_trt[[i]][,ind],2,Y1_matrix[,i], FUN="-") #-1(estimated Y(0) - observed Y(1))
-    full_rate <- 100000 * sweep(full_diff,2,pop_trt[ind],"/") #difference/population*100000
-    med_list[[i]] <- rowMedians(full_rate) #get avg of all treated points in each MCMC  (1000 x 1)
-    ci_bounds_list[i,] <- quantile(med_list[[i]], probs = c(.025,.975), na.rm=TRUE) #get coverage bounds
-    df <- t(data.frame(c(ci_bounds_list[i,], true_trt_rate)))
-    ci_width[i] <- ci_bounds_list[i,2] - ci_bounds_list[i,1]
-    covers[i] <- apply(df, MARGIN = 1, function(x) x[3] >= x[1] & x[3] <= x[2])
-  }
-  
-  coverage_percent <- 100*sum(covers)/ncol(Y1_matrix)
-  
-  return(list(med_list=med_list, ci_bounds_list=ci_bounds_list,ci_width=ci_width,
-              covers=covers,coverage_percent=coverage_percent))
-}
-
-
-
-
-##------------------------------------------------------------------------------------------------------
-
-# plot coverage percent
-plot_coverage_2k <- function(ori_3,ori_7,space_3,space_7,spacetime_ICAR_3,spacetime_ICAR_7,spacetime_AR_3,spacetime_AR_7,spacetime_shrink){
-  num_sim <- length(ori_3[[1]])
-  #avg percent bias
-  coverage_df <- abs(data.frame(ori_3 = unlist(ori_3$coverage_percent),ori_7 = unlist(ori_7$coverage_percent),space_3 = unlist(space_3$coverage_percent),space_7 = unlist(space_7$coverage_percent),spacetime_ICAR_3 = unlist(spacetime_ICAR_3$coverage_percent),spacetime_ICAR_7 = unlist(spacetime_ICAR_7$coverage_percent),spacetime_AR_3 = unlist(spacetime_AR_3$coverage_percent),spacetime_AR_7 = unlist(spacetime_AR_7$coverage_percent),spacetime_shrink = unlist(spacetime_shrink$coverage_percent)))
-  coverage_df.m <- melt(coverage_df)
-  k <- c(rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k_max=7",num_sim))
-  model <- c(rep("Original",num_sim*2),rep("Space",num_sim*2),rep("Space-Time \n ICAR",num_sim*2),rep("Space-Time \n AR(1)",num_sim*2),rep("Space-Time \n Shrinkage",num_sim))
-  
-  
-  # Plot
-  df_bias <- cbind(coverage_df.m ,k,model)
-  p <- df_bias  %>%
-    # Add a column called 'type': do we want to highlight the group or not?
-    #mutate( model=ifelse(variable=="spacetime_shrink","Shrinkage Spatio-Temporal","Spatio-Temporal")) %>%
-    ggplot( aes(x=model, y=value, color = k)) + geom_boxplot() + xlab("Model") + ylab("Percent Coverage") +scale_color_manual(values=c( "#00AFBB","#E7B800","#FC4E07","#E69F00", "#56B4E9")) + ggtitle("Comparing Percent Coverage")
-  
-  # Table
-  
-  #temp <- as.data.frame(do.call(cbind, lapply(coverage_df, function(x) round(summary(x), digits = 3))))
-  
-  #df <- cbind(temp[,1:9])
-  df <- coverage_df[,1:9]
-  
-  colnames(df) <- c("k=3","k=7","k=3","k=7","k=3","k=7","k=3","k=7","k_max=7")
-  t <- df %>%
-    kbl(caption = "Percent Coverage") %>%
-    kable_classic_2(full_width = F) %>%
-    add_header_above(c( "Original Model" = 2, "Space Model" = 2, "Space-Time ICAR Model" = 2, "Space-Time AR(1) Model" = 2,"Spatio-Temporal \n Shrinkage Model" = 1))
-  
-  return(list(p,t))
-}
-
-plot_coverage <- function(ori_3,space_3,spacetime_ICAR_3,spacetime_AR_3,spacetime_shrink, lasso_3){
-  num_sim <- length(ori_3[[1]])
-  #avg percent bias
-  coverage_df <- abs(data.frame(ori_3 = ori_3$coverage_percent,
-                                space_3 = space_3$coverage_percent,
-                                spacetime_ICAR_3 = spacetime_ICAR_3$coverage_percent,
-                                spacetime_AR_3 = spacetime_AR_3$coverage_percent,
-                                spacetime_shrink = spacetime_shrink$coverage_percent,
-                                lasso = lasso_3$coverage_percent))
-  
-  #coverage_df <- abs(data.frame(ori_3 = unlist(ori_3$coverage_percent),
-  #                              space_3 = unlist(space_3$coverage_percent),
-  #                              spacetime_ICAR_3 = unlist(spacetime_ICAR_3$coverage_percent),
-  #                              spacetime_AR_3 = unlist(spacetime_AR_3$coverage_percent),
-  #                              spacetime_shrink = unlist(spacetime_shrink$coverage_percent),
-  #                              lasso = unlist(lasso_3$avg_perc_bias)))
-  coverage_df.m <- melt(coverage_df)
-  k <- c(rep("k=3",num_sim),rep("k=3",num_sim),rep("k=3",num_sim),rep("k=3",num_sim),rep("k_max=7",num_sim),rep("k=3",num_sim))
-  model <- c(rep("Original",num_sim),rep("Space",num_sim),rep("Space-Time \n ICAR",num_sim),rep("Space-Time \n AR(1)",num_sim),rep("Space-Time \n Shrinkage",num_sim), rep("Shrinkage Lasso", num_sim))
-  
-  
-  # Plot
-  df_bias <- cbind(coverage_df.m ,k,model)
-  p <- df_bias  %>%
-    # Add a column called 'type': do we want to highlight the group or not?
-    #mutate( model=ifelse(variable=="spacetime_shrink","Shrinkage Spatio-Temporal","Spatio-Temporal")) %>%
-    ggplot( aes(x=model, y=value, color = k)) + geom_boxplot() + xlab("Model") + ylab("Percent Coverage") +scale_color_manual(values=c( "#00AFBB","#E7B800","#FC4E07","#E69F00", "#56B4E9")) + ggtitle("Comparing Percent Coverage")
-  
-  # Table
-  
-  #temp <- as.data.frame(do.call(cbind, lapply(coverage_df, function(x) round(summary(x), digits = 3))))
-  
-  #df <- cbind(temp[,1:9])
-  df <- coverage_df[,1:6]
-  
-  colnames(df) <- c("k=3","k=3","k=3","k=3","k_max=7","k=3")
-  t <- df %>%
-    kbl(caption = "Percent Coverage" ,format = 'html') %>%
-    kable_classic_2(full_width = F) %>%
-    add_header_above(c( "Original Model" = 1, "Space Model" = 1, "Space-Time ICAR Model" = 1, "Space-Time AR(1) Model" = 1,"Spatio-Temporal \n Shrinkage Model" = 1, "Shrinkage Lasso" = 1))
-  
-  #return(list(p,t))
-  return(t)
-}
-
-
-
-##------------------------------------------------------------------------------------------------------
-
-# plot coverage width
-plot_coverage_width_2k <- function(ori_3,ori_7,space_3,space_7,spacetime_ICAR_3,spacetime_ICAR_7,spacetime_AR_3,spacetime_AR_7,spacetime_shrink){
-  num_sim <- length(ori_3[[1]])
-
-  coverage_df <- abs(data.frame(ori_3 = unlist(ori_3$ci_width),ori_7 = unlist(ori_7$ci_width),space_3 = unlist(space_3$ci_width),space_7 = unlist(space_7$ci_width),spacetime_ICAR_3 = unlist(spacetime_ICAR_3$ci_width),spacetime_ICAR_7 = unlist(spacetime_ICAR_7$ci_width),spacetime_AR_3 = unlist(spacetime_AR_3$ci_width),spacetime_AR_7 = unlist(spacetime_AR_7$ci_width),spacetime_shrink = unlist(spacetime_shrink$ci_width)))
-  coverage_df.m <- melt(coverage_df)
-  k <- c(rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k=3",num_sim),rep("k=7",num_sim),rep("k_max=7",num_sim))
-  model <- c(rep("Original",num_sim*2),rep("Space",num_sim*2),rep("Space-Time \n ICAR",num_sim*2),rep("Space-Time \n AR(1)",num_sim*2),rep("Space-Time \n Shrinkage",num_sim))
-  
-  
-  # Plot
-  df_bias <- cbind(coverage_df.m ,k,model)
-  p <- df_bias  %>%
-    # Add a column called 'type': do we want to highlight the group or not?
-    #mutate( model=ifelse(variable=="spacetime_shrink","Shrinkage Spatio-Temporal","Spatio-Temporal")) %>%
-    ggplot( aes(x=model, y=value, color = k)) + geom_boxplot() + xlab("Model") + 
-    ylab("Coverage Width") +scale_color_manual(values=c( "#00AFBB","#E7B800",
-                                                         "#FC4E07","#E69F00", "#56B4E9")) + ggtitle("Comparing CI Widths")
-  
-  # Table
-  
-  temp <- as.data.frame(do.call(cbind, lapply(coverage_df, function(x) round(summary(x), digits = 3))))
-  
-  df <- cbind(temp[,1:9])
-  
-  colnames(df) <- c("k=3","k=7","k=3","k=7","k=3","k=7","k=3","k=7","k_max=7")
-  t <- df %>%
-    kbl(caption = "Summary Statistics for CI Width") %>%
-    kable_classic_2(full_width = F) %>%
-    add_header_above(c(" " = 1, "Original Model" = 2, "Space Model" = 2, "Space-Time ICAR Model" = 2, "Space-Time AR(1) Model" = 2,"Spatio-Temporal \n Shrinkage Model" = 1))
-  
-  return(list(p,t))
-}
-
-plot_coverage_width <- function(ori_3,space_3,spacetime_ICAR_3,spacetime_AR_3,spacetime_shrink,lasso_3){
-  num_sim <- length(ori_3[[1]])
-  
-  coverage_df <- abs(data.frame(ori_3 = unlist(ori_3$ci_width),space_3 = unlist(space_3$ci_width),
-                                spacetime_ICAR_3 = unlist(spacetime_ICAR_3$ci_width),
-                                spacetime_AR_3 = unlist(spacetime_AR_3$ci_width),
-                                spacetime_shrink = unlist(spacetime_shrink$ci_width),
-                                lasso = unlist(lasso_3$ci_width)))
-  coverage_df.m <- melt(coverage_df)
-  k <- c(rep("k=3",num_sim),rep("k=3",num_sim),rep("k=3",num_sim),rep("k=3",num_sim),rep("k_max=7",num_sim),rep("k=3",num_sim))
-  model <- c(rep("Original",num_sim),rep("Space",num_sim),rep("Space-Time \n ICAR",num_sim),rep("Space-Time \n AR(1)",num_sim),rep("Space-Time \n Shrinkage",num_sim), rep("Shrinkage Lasso", num_sim))
-  
-  
-  # Plot
-  df_bias <- cbind(coverage_df.m ,k,model)
-  p <- df_bias  %>%
-    # Add a column called 'type': do we want to highlight the group or not?
-    #mutate( model=ifelse(variable=="spacetime_shrink","Shrinkage Spatio-Temporal","Spatio-Temporal")) %>%
-    ggplot( aes(x=model, y=value, color = k)) + geom_boxplot() + xlab("Model") + 
-    ylab("Coverage Width") +scale_color_manual(values=c( "#00AFBB","#E7B800",
-                                                         "#FC4E07","#E69F00", "#56B4E9")) + ggtitle("Comparing CI Widths")
-  
-  # Table
-  
-  temp <- as.data.frame(do.call(cbind, lapply(coverage_df, function(x) round(summary(x), digits = 3))))
-  
-  df <- cbind(temp[,1:6])
-  
-  colnames(df) <- c("k=3","k=3","k=3","k=3","k_max=7", "k=3")
-  t <- df %>%
-    kbl(caption = "Summary Statistics for CI Width") %>%
-    kable_classic_2(full_width = F) %>%
-    add_header_above(c(" " = 1, "Original Model" = 1, "Space Model" = 1, "Space-Time ICAR Model" = 1, "Space-Time AR(1) Model" = 1,"Spatio-Temporal \n Shrinkage Model" = 1, "Shrinkage Lasso" = 1))
-  
-  return(list(p,t))
-}
 
 #-------------------------------------------------------------------------------------------------
 raw_v_est_plot_sim <- function(data=NM_new,pop_trt,Mu_trt,Y0_matrix,n_exp) {
@@ -1171,7 +978,7 @@ conv_vec <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_
   
 }
 
-# idk what i do but sometimes i need Mu_trt_ori_1[[i]][[1]] sometimes i dont
+
 
 conv_table <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_spacetime_AR_1,Mu_trt_lasso_1,
                        Mu_trt_ori_3,Mu_trt_space_3,Mu_trt_spacetime_ICAR_3,Mu_trt_spacetime_AR_3,Mu_trt_lasso_3,

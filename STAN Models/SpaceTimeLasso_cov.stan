@@ -89,9 +89,7 @@ model {
   lambdaL1 ~ gamma(1,0.1);
   lambdaL1 ~ gamma(1,0.1);
   
-  
-  //target += -0.5 * dot_self(d0[node1]-d0[node2]); //puts a prior on d0
-  
+ 
   // the following computes the prior on FS 
   for (i in 1:k) {
     target += log((prod(exp(-lambdaFS1[i]*(fabs(((FS[s_node1,i])' - (FS[s_node2,i])')))))) * prod(exp(-lambdaFS2[i]*fabs((FS[,i])'))));

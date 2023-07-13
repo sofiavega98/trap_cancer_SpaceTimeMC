@@ -145,13 +145,14 @@ rhat_table_YPred_v2 <- function(fit_sim_ori, fit_sim_space, fit_sim_space_time_I
   rhat_ICAR <- mean(ICAR_summary[,"Rhat"])
   
   # AR Model
-  #AR_summary <- summary(fit_sim_space_time_AR, pars = c("Y_pred"))$summary[ind,]
-  #rhat_AR <- mean(AR_summary[,"Rhat"])
-  rhat_AR <- NA
+  AR_summary <- summary(fit_sim_space_time_AR, pars = c("Y_pred"))$summary[ind,]
+  rhat_AR <- mean(AR_summary[,"Rhat"])
+  #rhat_AR <- NA
+  
   # Shrinkage Model
-  #shrink_summary <- summary(fit_sim_space_comb_time_shrink, pars = c("Y_pred"))$summary[ind,]
-  #rhat_shrink <- mean(shrink_summary[,"Rhat"])
-  rhat_shrink <- NA
+  shrink_summary <- summary(fit_sim_space_comb_time_shrink, pars = c("Y_pred"))$summary[ind,]
+  rhat_shrink <- mean(shrink_summary[,"Rhat"])
+  #rhat_shrink <- NA
   
   # Lasso Model
   lasso_summary <- summary(fit_sim_lasso, pars = c("Y_pred"))$summary[ind,]
@@ -401,7 +402,7 @@ get_ATT_gsc <- function(Mu_trt_gsc,Y1,pop_trt,ind,n_trt) {
 
 #-------------------------------------------------------------------------------------------------------
 
-# Get ATT JUST for California
+
 
 ATT_CACT_plot<- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spacetime_ICAR, Mu_trt_spacetime_AR, 
                         Mu_trt_space_comb_time_shrink, Mu_trt_lasso, fit_gsc){
@@ -724,8 +725,8 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
   Mu_trt_spacetime_ICAR_CA <- Mu_trt_spacetime_ICAR[,ind]
   Mu_trt_spacetime_AR_CA <- Mu_trt_spacetime_AR[,ind]
   Mu_trt_lasso_CA <- Mu_trt_lasso[,ind]
-  Mu_trt_space_comb_time_shrink_CA <- NA
-  #Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
+  #Mu_trt_space_comb_time_shrink_CA <- NA
+  Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
   Mu_trt_gsc_CA <- as.vector(t(fit_gsc$Y.ct)[1:(length(unique(treated1$FIPS))),(m_trt-1):m])
   
   # Subset Population for CA
@@ -747,8 +748,8 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
   Mu_trt_space_CT <- Mu_trt_space[,ind_CT]
   Mu_trt_spacetime_ICAR_CT <- Mu_trt_spacetime_ICAR[,ind_CT]
   Mu_trt_spacetime_AR_CT <- Mu_trt_spacetime_AR[,ind_CT]
-  Mu_trt_space_comb_time_shrink_CT <- NA
-  #Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
+  #Mu_trt_space_comb_time_shrink_CT <- NA
+  Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
   Mu_trt_lasso_CT <- Mu_trt_lasso[,ind_CT]
   Mu_trt_gsc_CT <- as.vector(t(fit_gsc$Y.ct)[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m])
   
@@ -775,9 +776,9 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
   agg_bounds_AR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CA,Y1_CA,pop_trt_CA)$CI
   
   print("shrink")
-  agg_ATT_shrink_CA_sub <- NA
-  #agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
-  #agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
+  #agg_ATT_shrink_CA_sub <- NA
+  agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
   
   print("lasso")
   agg_ATT_lasso_CA_sub <- get_agg_ATT(Mu_trt_lasso_CA,Y1_CA,pop_trt_CA)$ATT
@@ -798,9 +799,9 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
   agg_ATT_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$ATT
   agg_bounds_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$CI
   
-  agg_ATT_shrink_CT_sub <- NA
-  #agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
-  #agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
+  #agg_ATT_shrink_CT_sub <- NA
+  agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
   
   agg_ATT_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$ATT
   agg_bounds_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$CI
@@ -817,16 +818,16 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
   CI_space_CA <- CI_fun(agg_bounds_space_CA_sub)
   CI_ICAR_CA <- CI_fun(agg_bounds_ICAR_CA_sub)
   CI_AR_CA <- CI_fun(agg_bounds_AR_CA_sub)
-  #CI_shrink_CA <- CI_fun(agg_bounds_shrink_CA_sub)
-  CI_shrink_CA <- NA
+  CI_shrink_CA <- CI_fun(agg_bounds_shrink_CA_sub)
+  #CI_shrink_CA <- NA
   CI_lasso_CA <- CI_fun(agg_bounds_lasso_CA_sub)
   
   CI_ori_CT <- CI_fun(agg_bounds_ori_CT_sub)
   CI_space_CT <- CI_fun(agg_bounds_space_CT_sub)
   CI_ICAR_CT <- CI_fun(agg_bounds_ICAR_CT_sub)
   CI_AR_CT <- CI_fun(agg_bounds_AR_CT_sub)
-  #CI_shrink_CT <- CI_fun(agg_bounds_shrink_CT_sub)
-  CI_shrink_CT <- NA
+  CI_shrink_CT <- CI_fun(agg_bounds_shrink_CT_sub)
+  #CI_shrink_CT <- NA
   CI_lasso_CT <- CI_fun(agg_bounds_lasso_CT_sub)
   
   # Make kable table
@@ -877,8 +878,8 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   Mu_trt_spacetime_ICAR_CA <- Mu_trt_spacetime_ICAR[,ind]
   Mu_trt_spacetime_AR_CA <- Mu_trt_spacetime_AR[,ind]
   Mu_trt_lasso_CA <- Mu_trt_lasso[,ind]
-  Mu_trt_space_comb_time_shrink_CA <- NA
-  #Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
+  #Mu_trt_space_comb_time_shrink_CA <- NA
+  Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
   Mu_trt_gsc_CA <- as.vector(t(fit_gsc$Y.ct)[1:(length(unique(treated1$FIPS))),(m_trt-1):m])
   
   # Subset Population for CA
@@ -900,8 +901,8 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   Mu_trt_space_CT <- Mu_trt_space[,ind_CT]
   Mu_trt_spacetime_ICAR_CT <- Mu_trt_spacetime_ICAR[,ind_CT]
   Mu_trt_spacetime_AR_CT <- Mu_trt_spacetime_AR[,ind_CT]
-  Mu_trt_space_comb_time_shrink_CT <- NA
-  #Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
+  #Mu_trt_space_comb_time_shrink_CT <- NA
+  Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
   Mu_trt_lasso_CT <- Mu_trt_lasso[,ind_CT]
   Mu_trt_gsc_CT <- as.vector(t(fit_gsc$Y.ct)[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m])
   
@@ -929,10 +930,10 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   #agg_ATT_AR_CA_sub <- NA
   #agg_bounds_AR_CA_sub <- NA
  
-  agg_ATT_shrink_CA_sub <- NA
-  agg_bounds_shrink_CA_sub <- NA
-  #agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
-  #agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
+  #agg_ATT_shrink_CA_sub <- NA
+  #agg_bounds_shrink_CA_sub <- NA
+  agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
   
  
   agg_ATT_lasso_CA_sub <- get_agg_ATT(Mu_trt_lasso_CA,Y1_CA,pop_trt_CA)$ATT
@@ -955,10 +956,10 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   #agg_ATT_AR_CT_sub <- NA
   #agg_bounds_AR_CT_sub <- NA
   
-  agg_ATT_shrink_CT_sub <- NA
-  agg_bounds_shrink_CT_sub <- NA
-  #agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
-  #agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
+  #agg_ATT_shrink_CT_sub <- NA
+  #agg_bounds_shrink_CT_sub <- NA
+  agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
   
   agg_ATT_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$ATT
   agg_bounds_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$CI
@@ -1012,10 +1013,10 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   #agg_ATT_AR_sub <- NA
   #agg_bounds_AR_sub <- NA
   
-  #agg_ATT_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$ATT
-  #agg_bounds_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$CI
-  agg_ATT_shrink_sub <- NA
-  agg_bounds_shrink_sub <- NA
+  agg_ATT_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$CI
+  #agg_ATT_shrink_sub <- NA
+  #agg_bounds_shrink_sub <- NA
   
   agg_ATT_lasso_sub <- get_agg_ATT(Mu_trt_lasso[,ind],Y1,pop_trt[ind])$ATT
   agg_bounds_lasso_sub <- get_agg_ATT(Mu_trt_lasso[,ind],Y1,pop_trt[ind])$CI

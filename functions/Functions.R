@@ -1,5 +1,4 @@
 # Script of Functions primarily used in pre-processing
-# Last updated: 12/22/2022
 
 ## Get Y1_obs1:
 # This functions pulls the observed treated values using the indicator variable

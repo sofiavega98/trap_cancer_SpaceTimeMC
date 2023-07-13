@@ -1,4 +1,5 @@
 // spatio-temporal model with AR(1) prior on L 
+// Includes a soft-sum constraint for ICAR prior and tau^2~gamma(1,.01)
 data {
   int<lower = 0> m; // number of time points (T in the grant notation)
   int<lower = 0> k; // number of latent factors

@@ -69,8 +69,7 @@ transformed parameters {
 }
 
 model {
-  //target += -0.5 * dot_self(d0[node1]-d0[node2]); //puts a prior on d0
-  // put priors on the other variables to see if there's a change
+   // put priors on the other variables to see if there's a change
   alpha ~ normal(0,1);
   d0 ~ normal(0,1);
   c0 ~ normal(0,1);

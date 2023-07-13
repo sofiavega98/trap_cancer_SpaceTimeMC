@@ -1,4 +1,5 @@
-// spatio-temporal model with ICAR prior on L 
+// spatio-temporal model with Generalized Fused Lasso Priors on FS and L
+// See Masuda et al. 2022
 data {
   int<lower = 0> m; // number of time points (T in the grant notation)
   int<lower = 0> k; // number of latent factors
@@ -35,10 +36,7 @@ parameters {
   vector<lower=0>[k] lambdaL1; //parameter for laplace prior
   vector<lower=0>[k] lambdaL2; //parameter for laplace prior
   
-  //real lambdaFS1; //parameter for laplace prior
-  //real lambdaFS2; //parameter for laplace prior
-  //real lambdaL1; //parameter for laplace prior
-  //real lambdaL2; //parameter for laplace prior
+
 }
 
 transformed parameters {
@@ -64,24 +62,6 @@ model {
   lambdaFS2 ~ gamma(1,0.1);
   lambdaL1 ~ gamma(1,0.1);
   lambdaL1 ~ gamma(1,0.1);
-  
-  
-  
-  // the following computes the prior on FS 
-  //for (i in 1:k) {
-  //  target += (sum((-lambdaFS1*(fabs(((FS[s_node1,i])' - (FS[s_node2,i])')))))) + sum((-lambdaFS2*fabs((FS[,i])')));
-  //  print("target = ", target())
-  //}
-
-  
-  
-  // prior on L
-  //for (i in 1:k) {
-  //  target += (sum((-lambdaL1*(fabs(((L[t_node1,i])' - (L[t_node2,i])')))))) + sum((-lambdaL2*fabs((L[,i])')));
-  //  print("target = ", target())
-  //}
-  
-  
   
   
   

@@ -49,7 +49,6 @@ transformed parameters {
 model {
   tau_ICAR_FS ~ gamma(0.5,0.0005);
   tau_ICAR_L ~ gamma(0.5,0.0005);
-  //target += -0.5 * dot_self(d0[node1]-d0[node2]); //puts a prior on d0
   
   // the following computes the prior on FS on the unit scale with sd = 1
   for (i in 1:k) {

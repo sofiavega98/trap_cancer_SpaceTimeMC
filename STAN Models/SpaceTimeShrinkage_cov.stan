@@ -1,4 +1,4 @@
-// Same as SV_spatio-temporal_STAN but with multiplicative gamma shrinkage prior combined with AR1
+// Spatio-temporal model with multiplicative gamma shrinkage prior combined with AR1
 
 data {
   int<lower = 0> m; // number of time points (T in the grant notation)

@@ -1,4 +1,4 @@
-// Same as SV_spatio-temporal_STAN but with multiplicative gamma shrinkage prior combined with AR1
+// Spatio-temporal model with multiplicative gamma shrinkage prior combined with AR1
 
 data {
   int<lower = 0> m; // number of time points (T in the grant notation)
@@ -75,9 +75,7 @@ model {
   delta2 ~ gamma(a2,1);
   
   tau_ICAR ~ gamma(0.5,0.0005);
-  
-  //target += -0.5 * dot_self(d0[node1]-d0[node2]); //puts a prior on d0
-  
+ 
   
   // the following computes the prior on FS on the unit scale with sd = 1
   for (i in 1:k) {
