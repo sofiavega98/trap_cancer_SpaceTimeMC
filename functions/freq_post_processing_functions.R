@@ -31,6 +31,8 @@ get_perc_bias_Y0_gsc <- function(pop_trt,fit_gsc,Y0_matrix,ind){
 ## Abs Percent Bias Y0 Function GSC
 medianAbsPercBiasY0_year_gsc <- function(pop_trt,fit_gsc,Y0_matrix,ind){
   medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
+    #print(i)
   for(i in 1:length(fit_gsc)){
     # Find true treatment effect rate
     true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
@@ -54,15 +56,160 @@ medianAbsPercBiasY0_year_gsc <- function(pop_trt,fit_gsc,Y0_matrix,ind){
   
   # median of the simulations
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
   
-  return(list(median = median, LB = LB, UB = UB))
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
 }
+
+# Function for absolute percent bias of Y0 for ALS MC methods 
+medianAbsPercBiasY0_year_als <- function(pop_trt,fit_mc,Y0_matrix,ind){
+  
+  medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
+  for(i in 1:length(fit_mc)){
+    # Find true treatment effect rate
+    true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
+    
+    # Take average of counties for each time point
+    true_Y0_mean_rate <- colMeans(matrix(true_Y0_rate , ncol = 7, byrow = T)) # take median across counties
+    
+    
+    # extract the treated indices
+    # Convert to rate
+    mean_vec_rate <- as.vector(t(fit_mc[[i]][0:7,]))[ind]
+    
+    # For each simulation, take average counterfactual for each year over all counties 
+    # should be a vector of length 7
+    est_Y0 <- colMeans(matrix(mean_vec_rate, ncol = 7, byrow = T))
+    
+    # find absolute percent bias Y0 
+    absPercBias <- abs(((est_Y0  - true_Y0_mean_rate)/true_Y0_mean_rate) * 100)
+    
+    medianAbsPercBias[i] <- median(absPercBias,na.rm = T)
+  }
+  
+  # median of the simulations
+  median <- median(medianAbsPercBias)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
+  
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
+  
+  
+}
+
+# Function for absolute percent bias of Y0 for softImpute
+medianAbsPercBiasY0_year_softImpute <- function(pop_trt,fit_mc,Y0_matrix,ind){
+  medianAbsPercBias <- c()
+  for(i in 1:length(fit_mc)){
+    # Find true treatment effect rate
+    true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
+    
+    # Take average of counties for each time point
+    true_Y0_mean_rate <- colMeans(matrix(true_Y0_rate , ncol = 7, byrow = T)) # take median across counties
+    
+    # extract the treated indices
+    # Convert to rate
+    mean_vec_rate <- as.vector(t(fit_mc[[i]]))[ind]
+    
+    # For each simulation, take average counterfactual for each year over all counties 
+    # should be a vector of length 7
+    est_Y0 <- colMeans(matrix(mean_vec_rate, ncol = 7, byrow = T))
+    
+    # find absolute percent bias Y0 
+    absPercBias <- abs(((est_Y0  - true_Y0_mean_rate)/true_Y0_mean_rate) * 100)
+    
+    medianAbsPercBias[i] <- median(absPercBias,na.rm = T)
+  }
+  
+  # median of the simulations
+  median <- median(medianAbsPercBias)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
+  
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
+  
+}
+
+
+# Function for absolute percent bias of Y0 for MC methods in filling package (not GSC or ASC)
+medianAbsPercBiasY0_year_fill <- function(pop_trt,fit_mc,Y0_matrix,ind){
+  medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
+  for(i in 1:length(fit_mc)){
+    # Find true treatment effect rate
+    true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
+    
+    # Take average of counties for each time point
+    true_Y0_mean_rate <- colMeans(matrix(true_Y0_rate , ncol = 7, byrow = T)) # take median across counties
+    
+    # extract the treated indices
+    # Convert to rate
+    mean_vec_rate <- as.vector(t(fit_mc[[i]]$X))[ind]
+    
+    # For each simulation, take average counterfactual for each year over all counties 
+    # should be a vector of length 7
+    est_Y0 <- colMeans(matrix(mean_vec_rate, ncol = 7, byrow = T))
+    
+    # find absolute percent bias Y0 
+    absPercBias <- abs(((est_Y0  - true_Y0_mean_rate)/true_Y0_mean_rate) * 100)
+    
+    medianAbsPercBias[i] <- median(absPercBias,na.rm = T)
+  }
+  
+  # median of the simulations
+  median <- median(medianAbsPercBias)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
+  
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
+}
+
+# Function for absolute percent bias of Y0 for softImpute MC methods in filling package (not GSC or ASC)
+medianAbsPercBiasY0_year_fill_soft <- function(pop_trt,fit_mc,Y0_matrix,ind){
+  medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
+    for(i in 1:length(fit_mc)){
+    # Find true treatment effect rate
+    true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
+    
+    # Take average of counties for each time point
+    true_Y0_mean_rate <- colMeans(matrix(true_Y0_rate , ncol = 7, byrow = T)) # take median across counties
+    
+    # extract the treated indices
+    # Convert to rate
+
+    mean_vec_rate <- as.vector(t(fit_mc[[i]]$X[,,1]))[ind]
+    
+    # For each simulation, take average counterfactual for each year over all counties 
+    # should be a vector of length 7
+    est_Y0 <- colMeans(matrix(mean_vec_rate, ncol = 7, byrow = T))
+    
+    # find absolute percent bias Y0 
+    absPercBias <- abs(((est_Y0  - true_Y0_mean_rate)/true_Y0_mean_rate) * 100)
+    
+    medianAbsPercBias[i] <- median(absPercBias,na.rm = T)
+  }
+  
+  # median of the simulations
+  median <- median(medianAbsPercBias)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
+  
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
+}
+
 
 ## Abs Percent Bias Y0 ASC
 medianAbsPercBiasY0_year_asc <- function(pop_trt,fit_asc,Y0_matrix,ind){
   medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
   for(i in 1:length(fit_asc)){
     # Find true treatment effect rate
     true_Y0_rate <- 100000 * (Y0_matrix[ind,i]/pop_trt[ind])# Find Rate
@@ -86,10 +233,11 @@ medianAbsPercBiasY0_year_asc <- function(pop_trt,fit_asc,Y0_matrix,ind){
   
   # median of the simulations
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
   
-  return(list(median = median, LB = LB, UB = UB))
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
 }
 
 #------------------------------------------------------------------------------------
@@ -97,7 +245,8 @@ medianAbsPercBiasY0_year_asc <- function(pop_trt,fit_asc,Y0_matrix,ind){
 ## Function for GSC
 medianAbsPercBiasATT_year_gsc <- function(fit_gsc,Y0_matrix,Y1_matrix,true_trt_effect){
   medianAbsPercBias <- c()
-  for(i in 1:length(fit_gsc)){
+  for(i in c(seq(1:79),seq(81,84),seq(86,100))){
+  #for(i in 1:length(fit_gsc)){
     # Find true treatment effect rate
     true_trt_effect_rate <- (true_trt_effect/pop_trt[ind] * 100000)[,i]# Find Rate
     # Take average of counties for each time point
@@ -122,8 +271,8 @@ medianAbsPercBiasATT_year_gsc <- function(fit_gsc,Y0_matrix,Y1_matrix,true_trt_e
   }
   # median of the simulations
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
   
   return(list(median = median, LB = LB, UB = UB))
 }
@@ -131,6 +280,7 @@ medianAbsPercBiasATT_year_gsc <- function(fit_gsc,Y0_matrix,Y1_matrix,true_trt_e
 ## Function for ASC
 medianAbsPercBiasATT_year_asc <- function(fit_asc,Y0_matrix,Y1_matrix,true_trt_effect){
   medianAbsPercBias <- c()
+  #for(i in c(seq(1:79),seq(81,84),seq(86,100))){
   for(i in 1:length(fit_gsc)){
     # Find true treatment effect rate
     true_trt_effect_rate <- (true_trt_effect/pop_trt[ind] * 100000)[,i]# Find Rate
@@ -148,8 +298,8 @@ medianAbsPercBiasATT_year_asc <- function(fit_asc,Y0_matrix,Y1_matrix,true_trt_e
 
   # median of the simulations
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
   
   return(list(median = median, LB = LB, UB = UB))
 }

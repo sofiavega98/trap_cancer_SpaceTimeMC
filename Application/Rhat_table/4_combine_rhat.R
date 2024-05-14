@@ -6,14 +6,14 @@ library(kableExtra)
 
 
 # Load functions
-source('~/cl_quasi_exp/Functions.R')
-source('~/cl_quasi_exp/application_functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/application_functions.R')
 
 # Load data
-load("~/cl_quasi_exp/Application/Leukemia/Results/rhat_df_trt1995.RData")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Leukemia/Results/rhat_df_trt1995.RData")
 df_Leukemia <- df
 
-load("~/cl_quasi_exp/Application/Lymphoma/Results/rhat_df_trt1995.RData")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Lymphoma/Results/rhat_df_trt1995.RData")
 df_Lymphoma <- df
 
 df <- data.frame(df_Lymphoma, df_Leukemia$`Non-Smoothed`,df_Leukemia$Smoothed)
@@ -21,7 +21,7 @@ df <- data.frame(df_Lymphoma, df_Leukemia$`Non-Smoothed`,df_Leukemia$Smoothed)
 df_table <- kbl(round(df,2), format = "latex") %>%
   kable_classic()
 
-save_kable(df_table, file =  "~/cl_quasi_exp/Application/Rhat_table/rhat_table.tex",float = FALSE)
+save_kable(df_table, file =  "/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Rhat_table/rhat_table.tex",float = FALSE)
 
 ########################################
 ## Sensitivity Analysis: Increasing K ##
@@ -30,10 +30,10 @@ save_kable(df_table, file =  "~/cl_quasi_exp/Application/Rhat_table/rhat_table.t
 # Here we combine Rhat tables to make a table with all Rhat values
 
 # Load data
-load("~/cl_quasi_exp/Application/Leukemia/Results/rhat_df_trt1995_SensAnalysis.RData")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Leukemia/Results/rhat_df_trt1995_SensAnalysis.RData")
 df_Leukemia_SensAnalysis <- df
 
-load("~/cl_quasi_exp/Application/Lymphoma/Results/rhat_df_trt1995_SensAnalysis.RData")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Lymphoma/Results/rhat_df_trt1995_SensAnalysis.RData")
 df_Lymphoma_SensAnalysis <- df
 
 
@@ -53,5 +53,5 @@ colnames(results_df)[3:6] <- c("Lymphoma & Non-Smoothed","Lymphoma & Smoothed",
 results_df <- kbl(results_df, format = "latex") %>%
   kable_classic()
 
-save_kable(results_df, file =  "~/cl_quasi_exp/Application/Rhat_table/rhat_table_combined.tex",float = FALSE)
+save_kable(results_df, file =  "/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Rhat_table/rhat_table_combined.tex",float = FALSE)
 

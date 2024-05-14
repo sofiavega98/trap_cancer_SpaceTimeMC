@@ -8,7 +8,7 @@ trt_year <- 1996
 # Load packages
 #library(tidycensus)
 #library(spdep)
-source("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Functions.R")
+source("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R")
 
 # Load data
 load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/data/data_full.RData")
@@ -22,7 +22,7 @@ NM <- data[which(startsWith(data$FIPS,"35")),]
 NM_new <- subset(NM, NM$FIPS !="35999")
 
 # Load adjacency matrices
-load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/data/partial_W_nm.RData") # NM spatial adj matrix
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/partial_W_nm.RData") # NM spatial adj matrix
 load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/data/temp_adj_matrix_nm.RData") # NM temporal adj matrix
 
 ### Artificially block out time and counties as treated ###

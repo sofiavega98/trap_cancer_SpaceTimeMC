@@ -754,3 +754,141 @@ get_sim_spatial_rate_data_freq <- function(partial_W,temp_adj_matrix, trt_fips,p
   
   return(list(Y0_obs = Y0_obs, Y0_full = Y0_full, Y1_obs  = Y1_obs))
 }
+##################################################################################
+
+## CV Function for choosing lambda for SVT
+## Inputs:
+## - Y0_miss: the dataset in panel data form with NAs for treated counties after treatment
+## - k: number of folds for CV
+## Outputs:
+## - best_lambda
+
+svt_cv <- function(Y0_miss,k=10) {
+  
+  missing_data <- Y0_miss
+  
+  # Define the range of lambda values to consider
+  lambda_values <- seq(0.1, 2, by = 0.1)
+  
+  # Create an empty vector to store cross-validation error
+  cv_error <- numeric(length(lambda_values))
+  
+  # Get total elements
+  n = nrow(missing_data) * ncol(missing_data)
+  
+  # Indicator matrix of missingness
+  missing.matrix = is.na(missing_data)
+  
+  # Indices is all observed values
+  obs.idx = which(as.vector(!missing.matrix))
+  # Get observed set
+  obs.data = as.vector(missing_data)[obs.idx] # returns vector
+  
+  ## Create the k folds of the data so there is no overlap ##
+  library(caret)
+  
+  set.seed(501)
+  folds.idx <- createFolds(obs.idx, k = 10, list = TRUE, returnTrain = FALSE) # returns a list of indices corresponding to obs.idx
+  
+  for (i in 1:k) {
+    
+    # Identify indices to be removed for validation
+    remove.indices <- obs.idx[folds.idx[[i]]]
+    
+    # Select training data (put NAs where validation set is for testing)
+    train_data = as.vector(missing_data)
+    train_data[remove.indices] = NA
+    
+    # Put in matrix form
+    train_data = matrix(train_data, nrow = nrow(missing_data), byrow = F)
+    
+    for (j in 1:length(lambda_values)) {
+      # Fill missing values using SVT with current lambda value
+      filled_data <- fill.SVT(train_data, lambda = lambda_values[j])$X
+      
+      # Calculate error on validation set (sum of squared errors)
+      cv_error[j] <- cv_error[j] + sum(as.vector(filled_data)[remove.indices] - as.vector(missing_data)[remove.indices])^2
+      
+    }
+    
+  }
+  
+  # Average the errors across folds
+  cv_error <- cv_error / k
+  
+  # Choose lambda with minimum cross-validation error
+  best_lambda <- lambda_values[which.min(cv_error)]
+  
+  # Return best_lambda
+  return(best_lambda)
+}
+
+##################################################################################
+
+## CV Function for choosing lambda for soft impute
+## Inputs:
+## - Y0_miss: the dataset in panel data form with NAs for treated counties after treatment
+## - k: number of folds for CV
+## Outputs:
+## - best_lambda
+
+soft_impute_cv <- function(Y0_miss,k=10) {
+  
+  missing_data <- Y0_miss
+  
+  # Define the range of lambda values to consider
+  lambda_values <- seq(0.1, 2, by = 0.1)
+  
+  # Create an empty vector to store cross-validation error
+  cv_error <- numeric(length(lambda_values))
+  
+  # Get total elements
+  n = nrow(missing_data) * ncol(missing_data)
+  
+  # Indicator matrix of missingness
+  missing.matrix = is.na(missing_data)
+  
+  # Indices is all observed values
+  obs.idx = which(as.vector(!missing.matrix))
+  # Get observed set
+  obs.data = as.vector(missing_data)[obs.idx] # returns vector
+  
+  ## Create the k folds of the data so there is no overlap ##
+  library(caret)
+  
+  set.seed(501)
+  folds.idx <- createFolds(obs.idx, k = 10, list = TRUE, returnTrain = FALSE) # returns a list of indices corresponding to obs.idx
+  
+  for (i in 1:k) {
+    
+    # Identify indices to be removed for validation
+    remove.indices <- obs.idx[folds.idx[[i]]]
+    
+    # Select training data (put NAs where validation set is for testing)
+    train_data = as.vector(missing_data)
+    train_data[remove.indices] = NA
+    
+    # Put in matrix form
+    train_data = matrix(train_data, nrow = nrow(missing_data), byrow = F)
+    
+    for (j in 1:length(lambda_values)) {
+      # Fill missing values using SVT with current lambda value
+      filled_data <- fill.SoftImpute(train_data, lambdas = lambda_values[j])$X
+      
+      # Calculate error on validation set (sum of squared errors)
+      cv_error[j] <- cv_error[j] + sum(as.vector(filled_data)[remove.indices] - as.vector(missing_data)[remove.indices])^2
+      
+    }
+    
+  }
+  
+  # Average the errors across folds
+  cv_error <- cv_error / k
+  
+  # Choose lambda with minimum cross-validation error
+  best_lambda <- lambda_values[which.min(cv_error)]
+  
+  # Return best_lambda
+  return(best_lambda)
+}
+

@@ -11,8 +11,8 @@ library(readr)
 library(tidyverse)
 
 # Load cleaned data
-SEER <- read_csv("~/cl_quasi_exp/data/SEER0721_v2.csv")
-load("~/cl_quasi_exp/data/county_hisp_pop_0_9.RData")
+SEER <- read_csv("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/SEER0721_v2.csv")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/county_hisp_pop_0_9.RData")
 
 #####################
 ## Clean SEER Data ##
@@ -337,20 +337,35 @@ data_full_hisp %>%
 data_full_hisp_noZero <- data_full_hisp %>%
   filter(! FIPS %in% zero_case_FIPS)
 
+# Take out counties if there is only 1 case or no cases in the pre-treatment years
+data_full_hisp_noZero %>%
+  group_by(FIPS) %>%
+  summarise(total_cases = sum(CL_CASES[which(YEAR_DX %in% seq(years[1],(treated_year-1)))])) %>%
+  filter(total_cases <= 1) %>%
+  pull(FIPS) -> zero_case_FIPS
+data_full_hisp_noZero <- data_full_hisp_noZero %>%
+  filter(! FIPS %in% zero_case_FIPS)
+
 # Save final data
-save(data_full_hisp_noZero ,file = paste0('~/cl_quasi_exp/data/Leukemia_',years[1],'_',years[length(years)],'_0-9.RData'))
+save(data_full_hisp_noZero ,file = paste0('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Leukemia_',years[1],'_',years[length(years)],'_0-9.RData'))
 
 ##########################
 ## Get adjacency matrix ##
 ##########################
 
 # Load full adjacency matrix
-load("~/cl_quasi_exp/data/us_adj_mat.RData")
+load("/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/us_adj_mat.RData")
 
 # Subset full adjacency matrix based on data_full_hisp_noZero
 partial_us_adj_mat <- us_adj_mat[rownames(us_adj_mat)  %in%  
                                         unique(data_full_hisp_noZero$FIPS),colnames(us_adj_mat)  %in%  unique(data_full_hisp_noZero$FIPS)]
+
+# Re-order columns and rows to be in order of the fips in the dataset
+partial_us_adj_mat <- partial_us_adj_mat[match(unique(data_full_hisp_noZero$FIPS), colnames(partial_us_adj_mat)),
+                                         match(unique(data_full_hisp_noZero$FIPS), colnames(partial_us_adj_mat))]
+
+
 # Save adjacency matrix
-save(partial_us_adj_mat,file=paste0('~/cl_quasi_exp/data/leukemia_adj_mat_',years[1],'_',years[length(years)],'_0-9.RData'))
+save(partial_us_adj_mat,file=paste0('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/leukemia_adj_mat_',years[1],'_',years[length(years)],'_0-9.RData'))
 
 

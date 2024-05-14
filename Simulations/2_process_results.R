@@ -18,7 +18,7 @@ library(tidyverse)
 #est_k=1
 #rare="Rare"
 #smooth="smooth"
-#dir_out="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/Main/Results" # directory output path for results
+#dir_out="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/tau08/Results" # directory output path for results
 
 
 if(smooth == "smooth"){

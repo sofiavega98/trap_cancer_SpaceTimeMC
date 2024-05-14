@@ -1,6 +1,6 @@
 # trap_cancer_SpaceTimeMC
 
-Code for running analysis in: 
+Code for running analysis in: https://arxiv.org/abs/2307.09546
 
 
 This respository contains code used to conduct simulation studies comparing 6 Bayesian methods for matrix completion (Vanilla, Space, Space-Time ICAR, Space-Time AR, Space-Time Lasso, and Space-Time Shrinkage) with 3 exisiting methods (Athey's matrix completion (MC) found in the $\texttt{gysnth}$ R package, generalized synthetic control (GSC) found in the $\texttt{gysnth}$ R package, and augmented synthetic control (ASC) found in the $\texttt{augysnth}$ R package) on rare and non-rare simulated data. 
@@ -17,11 +17,11 @@ Code related to running simulations is found in `\Simulations\`
 * `1_sim_freq.R` is a script to generate simulated data and run the data on the frequentist models Athey MC, GSC, and ASC.
 * `1_sim_freq_smooth.R` is a script to generate simulated data and run the data on the frequentist models Athey MC, GSC, and ASC. but includes a temporal smoothing pre-processing step.
 * `2_process_results.R` is a script to take the individual Bayesian simulation results and saves them as one
-* `3_summarize_results.R.R` is a script to take the simulation results, calculate absolute percent biases of the counterfactual, and prepare results to inputted into a table. All absolute percent biases are calculated in the same format as ASC from Ben-Michael et al.
-* `3_summarize_results_freq.R` is a script to take the frequentist simulation results, calculate absolute percent biases of the counterfactual, and prepare results to inputted into a table. All absolute percent biases are calculated in the same format as ASC from Ben-Michael et al.
-* `4_make_tables.R` is a script to create LaTeX tables used in the paper.
-* `\Main\` contains shell scripts ending in ".sh" to launch jobs on the FASRC cluster for the results in the main paper.
-* `\Sensitivity_Analysis\` contains shell scripts ending in ".sh" to launch jobs on the FASRC cluster for the results in the supplemental section of the paper
+* `3_summarize_results_filter.R` is a script to take the simulation results, calculate absolute percent biases of the counterfactual, and prepare results to inputted into a table. All absolute percent biases are calculated in the same format as ASC from Ben-Michael et al.
+* `\code\3_summarize_results_freq.R` is a script to take the frequentist simulation results, calculate absolute percent biases of the counterfactual, and prepare results to inputted into a table. All absolute percent biases are calculated in the same format as ASC from Ben-Michael et al.
+* `\code\4_make_tables.R` is a script to create LaTeX tables used in the paper.
+* `\tau1\` contains shell scripts ending in ".sh" to launch jobs on the FASRC cluster for the results in the main paper.
+* `\tau08\` contains shell scripts ending in ".sh" to launch jobs on the FASRC cluster for the results in the supplemental section of the paper.
 
 ## Application
 Code related to running the models on cancer data is found in `\Application\` and `\Sensitivity_Analysis_1983_2003\`. Within each folder, are folders for each outcome, `/Leukemia/` and `/Lymphoma/` with associated code and shell scripts inside. 
@@ -46,10 +46,6 @@ STAN code related to Models 1-6 is found in `\STAN Models\`.
 * `SpaceTimeLasso.stan` is a script to run Model 5 (Space-Time Lasso) for the simulations.
 * `SpaceTimeShrinkage.stan` is a script to run Model 6 (Space-Time Shrinkage) for the simulations.
 
-* `Space_altPrior.stan` is a script to run Model 2 (Space) with the alternative prior for the simulations.
-* `SpaceTimeICAR_altPrior.stan` is a script to run Model 3 (Space-Time ICAR) with the alternative prior for the simulations.
-* `SpaceTimeAR_altPrior.stan` is a script to run Model 4 (Space-Time AR) with the alternative prior for the simulations.
-* `SpaceTimeShrinkage_altPrior.stan` is a script to run Model 6 (Space-Time Shrinkage) with the alternative prior for the simulations.
 
 * `Vanilla_cov.stan` is a script to run Model 1 (Vanilla) for the application. This script allows for the inclusion of covariates.
 * `Space_cov.stan` is a script to run Model 2 (Space) for the application. This script allows for the inclusion of covariates.
@@ -58,10 +54,6 @@ STAN code related to Models 1-6 is found in `\STAN Models\`.
 * `SpaceTimeLasso_cov.stan` is a script to run Model 5 (Space-Time Lasso) for the application. This script allows for the inclusion of covariates.
 * `SpaceTimeShrinkage_cov.stan` is a script to run Model 6 (Space-Time Shrinkage) for the application. This script allows for the inclusion of covariates.
 
-* `Space_altPrior_cov.stan` is a script to run Model 2 (Space) with the alternative prior for the application. This script allows for the inclusion of covariates.
-* `SpaceTimeICAR_altPrior_cov.stan` is a script to run Model 3 (Space-Time ICAR) with the alternative prior for the application. This script allows for the inclusion of covariates.
-* `SpaceTimeAR_altPrior_cov.stan` is a script to run Model 4 (Space-Time AR) with the alternative prior for the application. This script allows for the inclusion of covariates.
-* `SpaceTimeShrinkage_altPrior_cov.stan` is a script to run Model 6 (Space-Time Shrinkage) with the alternative prior for the application. This script allows for the inclusion of covariates.
-  
+
   
 

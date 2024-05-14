@@ -36,7 +36,7 @@ parameters {
   vector[m] c0; //time-specific deviations from global intercept
   matrix[n,k] FS; //Factor scores matrix (U in the grant notation)
   matrix[m, k] L; //factor loadings matrix (V in the grant notation)
-  real<lower=0> phi; //nb scale parameter
+  real<lower=0> log_phi; //nb scale parameter
 
   
   vector<lower=0>[k] lambdaFS1; //parameter for laplace prior
@@ -78,37 +78,43 @@ transformed parameters {
 }
 
 model {
-  // put priors on the other variables to see if there's a change
-  alpha ~ normal(0,1);
-  d0 ~ normal(0,1);
-  c0 ~ normal(0,1);
-  
   // gamma distribution on hyperparameters lambda from Casella et al 2010 paper
-  lambdaFS1 ~ gamma(1,0.1);
-  lambdaFS2 ~ gamma(1,0.1);
-  lambdaL1 ~ gamma(1,0.1);
-  lambdaL1 ~ gamma(1,0.1);
+  lambdaFS1 ~ gamma(1,.01);
+  lambdaFS2 ~ gamma(1,.01);
+  lambdaL1 ~ gamma(1,.01);
+  lambdaL1 ~ gamma(1,.01);
   
- 
+  log_phi ~ normal(0, 1);
+  
+  
   // the following computes the prior on FS 
   for (i in 1:k) {
     target += log((prod(exp(-lambdaFS1[i]*(fabs(((FS[s_node1,i])' - (FS[s_node2,i])')))))) * prod(exp(-lambdaFS2[i]*fabs((FS[,i])'))));
+  // soft sum-to-zero constraint on phi,
+  // equivalent to mean(phi) ~ normal(0,0.01)
+  sum(FS[,i]) ~ normal(0, 0.01 * N);
   }
+  
+  
 
   // prior on L
   for (i in 1:k) {
    target += log((prod(exp(-lambdaL1[i]*(fabs(((L[t_node1,i])' - (L[t_node2,i])')))))) * prod(exp(-lambdaL2[i]*fabs((L[,i])'))));
+  
+  // soft sum-to-zero constraint on phi,
+  // equivalent to mean(phi) ~ normal(0,0.01)
+  sum(L[,i]) ~ normal(0, 0.01 * M);
   }
   
   for(i in 1:n){
     for (j in 1:m){
-      if (1-y_miss[i,j]) y[i,j] ~ neg_binomial_2(Mu[i,j],phi); //Likelihood contribution when y isn't missing
+      if (1-y_miss[i,j]) y[i,j] ~ neg_binomial_2(Mu[i,j],exp(log_phi)); //Likelihood contribution when y isn't missing
     }
   }
 }
 
 generated quantities{
-  int<lower=0> Y_pred[n_exp*m]; //Compute the predictions for treated units at treated times
+  int Y_pred[n_exp*m]; //Compute the predictions for treated units at treated times
   real<lower=0> Mu_trt[n_exp*m]; //Extract the expected value for all treated units (all time periods)
   {
     int idy=0;
@@ -119,7 +125,11 @@ generated quantities{
         idz=idz+1;
         
         for (j in 1:m){
-          Y_pred[idy+1]=neg_binomial_2_rng(Mu[i,j],phi); // Calculate and save posterior prediction
+          if (log(Mu[i,j])>20){ // set some reasonable threshold here
+            Y_pred[idy+1]=-1; // set to some value that you can "filter" out
+          } else {
+              Y_pred[idy+1]=neg_binomial_2_rng(Mu[i,j],exp(log_phi)); // Calculate and save posterior prediction
+          }
           idy=idy+1;
         }
       }

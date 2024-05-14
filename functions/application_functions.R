@@ -293,6 +293,99 @@ raw_v_est_plot <- function(data,pop_trt,mu_matrix_l,treated,n_trt,m,Y1) {
   plot(p1)
   
 }
+#####################################################################################
+# Raw vs. Estimated Plot for SVT
+raw_v_est_plot_svt <- function(data,pop_trt,mu_matrix_l,treated,n_trt,m,raw){
+  
+  full_Y1_obs1 <- raw
+  
+  full_time <- unique(data$YEAR_DX)
+  
+  ### Posterior
+  post_Mu_trt_matrix <- mu_matrix_l # # counties x # of years
+  
+  
+  post_Mu_trt_avg_rate_l <- colMeans(post_Mu_trt_matrix, na.rm = T) #take median of counties in each time point (length 15)
+  post_Mu_trt_avg_lower_l <- apply(post_Mu_trt_matrix, 2, function(x) {quantile(x, probs = 0.05, na.rm = T)}) # get quantiles since averaging over counties
+  post_Mu_trt_avg_upper_l <- apply(post_Mu_trt_matrix, 2, function(x) {quantile(x, probs = 0.95, na.rm = T)})    
+  
+  #posterior sample df
+  post_trt_l <- data.frame(time = full_time, mean = post_Mu_trt_avg_rate_l, 
+                           lower = post_Mu_trt_avg_lower_l, upper = post_Mu_trt_avg_upper_l, 
+                           type = factor("estimated"))
+  
+  ### Raw
+  raw_trt_rate_l <- 100000 * full_Y1_obs1/pop_trt #get rate
+  full_raw_trt_matrix <- matrix(raw_trt_rate_l,nrow=n_trt,ncol = m,byrow=T)
+  
+  #raw_trt_avg_rate_l <- colMeans(raw_trt_rate_l)
+  raw_trt_avg_rate_l <- colMeans(full_raw_trt_matrix, na.rm = T)
+  raw_trt_avg_lower_l <- apply(full_raw_trt_matrix, 2, function(x) {quantile(x, probs = 0.05, na.rm = T)})
+  raw_trt_avg_upper_l <- apply(full_raw_trt_matrix, 2, function(x) {quantile(x, probs = 0.95, na.rm = T)})  
+  
+  #observed sample df
+  raw_trt_l <- data.frame(time = full_time, mean = raw_trt_avg_rate_l , 
+                          lower = raw_trt_avg_lower_l, upper = raw_trt_avg_upper_l, 
+                          type = factor("raw"))
+  
+  
+  to_plot <- rbind(post_trt_l, raw_trt_l)
+  
+  p1<- ggplot(data = to_plot, aes(x = time, y = mean, group = type, color = type)) + geom_line() + geom_point() + 
+    geom_ribbon(aes(ymin = lower, ymax = upper, fill = type), alpha = 0.1) + 
+    ylab( 'Number of Cases per 100000') + geom_vline(xintercept = 1995, color = 'black') +
+    ggtitle("Comparing Raw Treated Average Rate with \n Estimated Average Rate")  
+  
+  plot(p1)
+  
+}
+
+#####################################################################################
+# Raw vs. Estimated Plot for GSC
+raw_v_est_plot_gsc  <- function(data,pop_trt,mu_matrix_l,treated,n_trt,m,raw){
+  
+  full_Y1_obs1 <- raw
+  
+  full_time <- unique(data$YEAR_DX)
+  
+  ### Posterior
+  post_Mu_trt_matrix <- t(mu_matrix_l$Y.ct) # # counties x # of years
+  
+  
+  post_Mu_trt_avg_rate_l <- colMeans(post_Mu_trt_matrix, na.rm = T) #take median of counties in each time point (length 15)
+  post_Mu_trt_avg_lower_l <- apply(post_Mu_trt_matrix, 2, function(x) {quantile(x, probs = 0.05, na.rm = T)}) # get quantiles since averaging over counties
+  post_Mu_trt_avg_upper_l <- apply(post_Mu_trt_matrix, 2, function(x) {quantile(x, probs = 0.95, na.rm = T)})    
+  
+  #posterior sample df
+  post_trt_l <- data.frame(time = full_time, mean = post_Mu_trt_avg_rate_l, 
+                           lower = post_Mu_trt_avg_lower_l, upper = post_Mu_trt_avg_upper_l, 
+                           type = factor("estimated"))
+  
+  ### Raw
+  raw_trt_rate_l <- 100000 * full_Y1_obs1/pop_trt #get rate
+  full_raw_trt_matrix <- matrix(raw_trt_rate_l,nrow=n_trt,ncol = m,byrow=T)
+  
+  #raw_trt_avg_rate_l <- colMeans(raw_trt_rate_l)
+  raw_trt_avg_rate_l <- colMeans(full_raw_trt_matrix, na.rm = T)
+  raw_trt_avg_lower_l <- apply(full_raw_trt_matrix, 2, function(x) {quantile(x, probs = 0.05, na.rm = T)})
+  raw_trt_avg_upper_l <- apply(full_raw_trt_matrix, 2, function(x) {quantile(x, probs = 0.95, na.rm = T)})  
+  
+  #observed sample df
+  raw_trt_l <- data.frame(time = full_time, mean = raw_trt_avg_rate_l , 
+                          lower = raw_trt_avg_lower_l, upper = raw_trt_avg_upper_l, 
+                          type = factor("raw"))
+  
+  
+  to_plot <- rbind(post_trt_l, raw_trt_l)
+  
+  p1<- ggplot(data = to_plot, aes(x = time, y = mean, group = type, color = type)) + geom_line() + geom_point() + 
+    geom_ribbon(aes(ymin = lower, ymax = upper, fill = type), alpha = 0.1) + 
+    ylab( 'Number of Cases per 100000') + geom_vline(xintercept = 1995, color = 'black') +
+    ggtitle("Comparing Raw Treated Average Rate with \n Estimated Average Rate")  
+  
+  plot(p1)
+  
+}
 
 
 ###################################################################################################
@@ -695,6 +788,29 @@ get_agg_ATT_gsc <- function(Y0_est_rate,Y1,pop_trt,n_trt,fit_gsc) {
   return(list(ATT = ATT, CI = c(CI)))
 }
 
+# Function for aggregate ATT for svt
+get_agg_ATT_svt <- function(Y0_est_rate,Y1,pop_trt,n_trt) {
+  
+  # Convert to rates
+  #Y0_est_rate <- as.vector(t(fit_gsc$Y.ct)[,(m_trt-1):m])
+  
+  # subset population to be treated counties at treated times
+  #pop_trt_temp <- matrix(pop_trt,nrow = n_trt, byrow = T)[,(m-m_trt+1):m] #(13 x 7)
+  pop_trt_temp <- matrix(pop_trt,nrow = n_trt, byrow = T)
+  
+  # convert Y1 into rate
+  Y1_rate <- 100000 * Y1/as.vector(t(pop_trt_temp))
+  
+  
+  # Get an ATT 
+  ATT <- mean(as.vector(Y1_rate) - Y0_est_rate) 
+  
+  
+  
+  
+  return(list(ATT = ATT))
+}
+
 
 #---------------------------------------------------------------------------------------------
 # Function to create a table with the total ATT for CA and CT
@@ -853,7 +969,7 @@ ATT_CACT_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spac
 # Function to create a table with the total ATT for CA and CT and Overall
 
 ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spacetime_ICAR, Mu_trt_spacetime_AR, 
-                           Mu_trt_space_comb_time_shrink, Mu_trt_lasso, fit_gsc,trt_year){
+                           Mu_trt_space_comb_time_shrink, Mu_trt_lasso, fit_gsc, fit_svt, trt_year){
   library(kableExtra)
   # Split CA and CT
   
@@ -878,9 +994,9 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   Mu_trt_spacetime_ICAR_CA <- Mu_trt_spacetime_ICAR[,ind]
   Mu_trt_spacetime_AR_CA <- Mu_trt_spacetime_AR[,ind]
   Mu_trt_lasso_CA <- Mu_trt_lasso[,ind]
-  #Mu_trt_space_comb_time_shrink_CA <- NA
   Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
   Mu_trt_gsc_CA <- as.vector(t(fit_gsc$Y.ct)[1:(length(unique(treated1$FIPS))),(m_trt-1):m])
+  Mu_trt_svt_CA <-  as.vector(t(fit_svt$X[1:(length(unique(treated1$FIPS))),(m_trt-1):m]))
   
   # Subset Population for CA
   pop_trt_CA <- treated1 %>% filter(YEAR_DX >= trt_year)
@@ -901,10 +1017,10 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   Mu_trt_space_CT <- Mu_trt_space[,ind_CT]
   Mu_trt_spacetime_ICAR_CT <- Mu_trt_spacetime_ICAR[,ind_CT]
   Mu_trt_spacetime_AR_CT <- Mu_trt_spacetime_AR[,ind_CT]
-  #Mu_trt_space_comb_time_shrink_CT <- NA
   Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
   Mu_trt_lasso_CT <- Mu_trt_lasso[,ind_CT]
   Mu_trt_gsc_CT <- as.vector(t(fit_gsc$Y.ct)[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m])
+  Mu_trt_svt_CT <-  as.vector(t(fit_svt$X[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m]))
   
   # Subset Population
   treated2 <- data_full_hisp %>% filter((str_starts(FIPS, "09")))
@@ -927,11 +1043,7 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   
   agg_ATT_AR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CA,Y1_CA,pop_trt_CA)$ATT
   agg_bounds_AR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CA,Y1_CA,pop_trt_CA)$CI
-  #agg_ATT_AR_CA_sub <- NA
-  #agg_bounds_AR_CA_sub <- NA
- 
-  #agg_ATT_shrink_CA_sub <- NA
-  #agg_bounds_shrink_CA_sub <- NA
+
   agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
   agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
   
@@ -940,6 +1052,8 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   agg_bounds_lasso_CA_sub <- get_agg_ATT(Mu_trt_lasso_CA,Y1_CA,pop_trt_CA)$CI
   
   agg_ATT_gsc_CA_sub <- get_agg_ATT_gsc(Mu_trt_gsc_CA,Y1_CA,pop_trt_CA,n_trt_CA,fit_gsc)$ATT
+  
+  agg_ATT_svt_CA_sub <- get_agg_ATT_svt(Mu_trt_svt_CA,Y1_CA,pop_trt_CA,n_trt_CA)$ATT
   
   # Connecticut
   agg_ATT_ori_CT_sub <- get_agg_ATT(Mu_trt_ori_CT,Y1_CT,pop_trt_CT)$ATT
@@ -953,11 +1067,7 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   
   agg_ATT_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$ATT
   agg_bounds_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$CI
-  #agg_ATT_AR_CT_sub <- NA
-  #agg_bounds_AR_CT_sub <- NA
-  
-  #agg_ATT_shrink_CT_sub <- NA
-  #agg_bounds_shrink_CT_sub <- NA
+
   agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
   agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
   
@@ -966,7 +1076,9 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   
   agg_ATT_gsc_CT_sub <- get_agg_ATT_gsc(Mu_trt_gsc_CT,Y1_CT,pop_trt_CT,n_trt_CT,fit_gsc)$ATT
   
+  agg_ATT_svt_CT_sub <- get_agg_ATT_svt(Mu_trt_svt_CT,Y1_CT,pop_trt_CT,n_trt_CT)$ATT
   
+    
   CI_fun <- function(bounds){
     out <- paste0("(",round(bounds[1],2)," , ",round(bounds[2],2),")")
     return(out)
@@ -994,6 +1106,8 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   }
   
   Mu_trt_gsc <- as.vector(t(fit_gsc$Y.ct)[,(m_trt-1):m])
+  
+  Mu_trt_svt <- as.vector(t(fit_svt$X[1:(n_trt_CA + n_trt_CT),(m_trt-1):m]))
   
   agg_ATT_ori_sub <- get_agg_ATT(Mu_trt_ori[,ind],Y1,pop_trt[ind])$ATT
   agg_bounds_ori_sub <-  get_agg_ATT(Mu_trt_ori[,ind],Y1,pop_trt[ind])$CI
@@ -1024,6 +1138,8 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   agg_ATT_gsc_sub <- get_agg_ATT_gsc(Mu_trt_gsc,Y1,pop_trt[ind],n_trt,fit_gsc)$ATT
   agg_bounds_gsc_sub <- get_agg_ATT_gsc(Mu_trt_gsc,Y1,pop_trt[ind],n_trt,fit_gsc)$CI
   
+  agg_ATT_svt_sub <- get_agg_ATT_svt(Mu_trt_svt,Y1,pop_trt[ind],n_trt)$ATT
+  
   CI_fun <- function(bounds){
     out <- paste0("(",round(bounds[1],2)," , ",round(bounds[2],2),")")
     return(out)
@@ -1049,17 +1165,17 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
   
   
   # Make kable table
-  Model <- c("Gsynth",rep("Vanilla",1),rep("Space",1),rep("Space-Time \n ICAR",1),rep("Space-Time \n AR",1), rep("Bayesian \n Lasso", 1),rep("Space-Time \n Shrinkage",1))
+  Model <- c("Gsynth","SVT MC",rep("Vanilla",1),rep("Space",1),rep("Space-Time \n ICAR",1),rep("Space-Time \n AR",1), rep("Bayesian \n Lasso", 1),rep("Space-Time \n Shrinkage",1))
   df <- cbind(Model, 
-              round(c(agg_ATT_gsc_CA_sub,agg_ATT_ori_CA_sub,agg_ATT_space_CA_sub,agg_ATT_ICAR_CA_sub,
-                      agg_ATT_AR_CA_sub,agg_ATT_shrink_CA_sub,agg_ATT_lasso_CA_sub), 2),
-              c("NA",CI_ori_CA,CI_space_CA,CI_ICAR_CA,CI_AR_CA,CI_lasso_CA,CI_shrink_CA),
-              round(c(agg_ATT_gsc_CT_sub,agg_ATT_ori_CT_sub,agg_ATT_space_CT_sub,agg_ATT_ICAR_CT_sub,
+              round(c(agg_ATT_gsc_CA_sub,agg_ATT_svt_CA_sub,agg_ATT_ori_CA_sub,agg_ATT_space_CA_sub,agg_ATT_ICAR_CA_sub,
+                      agg_ATT_AR_CA_sub,agg_ATT_lasso_CA_sub,agg_ATT_shrink_CA_sub), 2),
+              c("NA","NA",CI_ori_CA,CI_space_CA,CI_ICAR_CA,CI_AR_CA,CI_lasso_CA,CI_shrink_CA),
+              round(c(agg_ATT_gsc_CT_sub,agg_ATT_svt_CT_sub,agg_ATT_ori_CT_sub,agg_ATT_space_CT_sub,agg_ATT_ICAR_CT_sub,
                       agg_ATT_AR_CT_sub,agg_ATT_lasso_CT_sub,agg_ATT_shrink_CT_sub), 2),
-              c("NA",CI_ori_CT,CI_space_CT,CI_ICAR_CT,CI_AR_CT,CI_lasso_CT,CI_shrink_CT), 
-              round(c(agg_ATT_gsc_sub,agg_ATT_ori_sub,agg_ATT_space_sub,agg_ATT_ICAR_sub,
+              c("NA","NA",CI_ori_CT,CI_space_CT,CI_ICAR_CT,CI_AR_CT,CI_lasso_CT,CI_shrink_CT), 
+              round(c(agg_ATT_gsc_sub,agg_ATT_svt_sub,agg_ATT_ori_sub,agg_ATT_space_sub,agg_ATT_ICAR_sub,
                       agg_ATT_AR_sub,agg_ATT_lasso_sub,agg_ATT_shrink_sub), 2),
-              c(CI_gsc,CI_ori,CI_space,CI_ICAR,CI_AR,CI_lasso,CI_shrink))
+              c(CI_gsc,"NA",CI_ori,CI_space,CI_ICAR,CI_AR,CI_lasso,CI_shrink))
   
   rownames(df) <- NULL
   colnames(df) <- c("Model", "ATT", "95% CI", "ATT", "95% CI", "ATT", "95% CI")
@@ -1068,6 +1184,213 @@ ATT_CACT_overall_table <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_
     add_header_above(c(" " , "California" = 2, "Connecticut" = 2, "Overall" = 2))
   
   return(table)
+}
+
+ATT_CACT_overall_df <- function(data_full_hisp, Mu_trt_ori, Mu_trt_space, Mu_trt_spacetime_ICAR, Mu_trt_spacetime_AR, 
+                                   Mu_trt_space_comb_time_shrink, Mu_trt_lasso, fit_gsc,fit_svt,trt_year){
+  library(kableExtra)
+  # Split CA and CT
+  
+  # Get CA
+  treated1 <- data_full_hisp %>% filter((str_starts(FIPS, "06")))
+  
+  Y1_CA <- get_Y1_obs1(treated1)
+  
+  n_trt_CA <- length(unique(treated1$FIPS))
+  
+  m <- length(unique(treated1$YEAR_DX))
+  
+  # Find which indices are CA
+  ind <- c()
+  for(i in 0:(n_trt_CA-1)){
+    ind <- append(ind,seq((m_trt-1),m) + (i*m))
+  }
+  
+  # Subset CA
+  Mu_trt_ori_CA <- Mu_trt_ori[,ind]
+  Mu_trt_space_CA <- Mu_trt_space[,ind]
+  Mu_trt_spacetime_ICAR_CA <- Mu_trt_spacetime_ICAR[,ind]
+  Mu_trt_spacetime_AR_CA <- Mu_trt_spacetime_AR[,ind]
+  Mu_trt_lasso_CA <- Mu_trt_lasso[,ind]
+  Mu_trt_space_comb_time_shrink_CA <- Mu_trt_space_comb_time_shrink[,ind]
+  Mu_trt_gsc_CA <- as.vector(t(fit_gsc$Y.ct)[1:(length(unique(treated1$FIPS))),(m_trt-1):m])
+  Mu_trt_svt_CA <-  as.vector(t(fit_svt$X[1:(length(unique(treated1$FIPS))),(m_trt-1):m]))
+  
+  # Subset Population for CA
+  pop_trt_CA <- treated1 %>% filter(YEAR_DX >= trt_year)
+  pop_trt_CA <- pop_trt_CA$POP
+  
+  # Get CT
+  Y1_CT <- Y1[(length(Y1_CA)+1):length(Y1)]
+  
+  n_trt_CT <- length(unique(unique(data_full_hisp %>% filter(str_starts(FIPS,"09")))$FIPS))
+  
+  ind_CT <- c()
+  for(j in (i+1):(n_trt_CT+(i+1)-1)){
+    ind_CT <- append(ind_CT,seq(m_trt-1,m) + (j*m))
+  }
+  
+  # Subset STAN output (Cali is first 5 counties)
+  Mu_trt_ori_CT <- Mu_trt_ori[,ind_CT]
+  Mu_trt_space_CT <- Mu_trt_space[,ind_CT]
+  Mu_trt_spacetime_ICAR_CT <- Mu_trt_spacetime_ICAR[,ind_CT]
+  Mu_trt_spacetime_AR_CT <- Mu_trt_spacetime_AR[,ind_CT]
+  Mu_trt_space_comb_time_shrink_CT <- Mu_trt_space_comb_time_shrink[,ind_CT]
+  Mu_trt_lasso_CT <- Mu_trt_lasso[,ind_CT]
+  Mu_trt_gsc_CT <- as.vector(t(fit_gsc$Y.ct)[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m])
+  Mu_trt_svt_CT <-  as.vector(t(fit_svt$X[(n_trt_CA+1):(n_trt_CA + n_trt_CT),(m_trt-1):m]))
+  
+  # Subset Population
+  treated2 <- data_full_hisp %>% filter((str_starts(FIPS, "09")))
+  pop_trt_CT <- treated2 %>% filter(YEAR_DX >= trt_year)
+  pop_trt_CT <- pop_trt_CT$POP
+  
+  # California
+  
+  agg_ATT_ori_CA_sub <- get_agg_ATT(Mu_trt_ori_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_ori_CA_sub <-  get_agg_ATT(Mu_trt_ori_CA,Y1_CA,pop_trt_CA)$CI
+  
+  
+  agg_ATT_space_CA_sub <- get_agg_ATT(Mu_trt_space_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_space_CA_sub <-  get_agg_ATT(Mu_trt_space_CA,Y1_CA,pop_trt_CA)$CI
+  
+  
+  agg_ATT_ICAR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_ICAR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR_CA,Y1_CA,pop_trt_CA)$CI
+  
+  
+  agg_ATT_AR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_AR_CA_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CA,Y1_CA,pop_trt_CA)$CI
+  
+  agg_ATT_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_shrink_CA_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CA,Y1_CA,pop_trt_CA)$CI
+  
+  
+  agg_ATT_lasso_CA_sub <- get_agg_ATT(Mu_trt_lasso_CA,Y1_CA,pop_trt_CA)$ATT
+  agg_bounds_lasso_CA_sub <- get_agg_ATT(Mu_trt_lasso_CA,Y1_CA,pop_trt_CA)$CI
+  
+  agg_ATT_gsc_CA_sub <- get_agg_ATT_gsc(Mu_trt_gsc_CA,Y1_CA,pop_trt_CA,n_trt_CA,fit_gsc)$ATT
+  
+  agg_ATT_svt_CA_sub <- get_agg_ATT_svt(Mu_trt_svt_CA,Y1_CA,pop_trt_CA,n_trt_CA)$ATT
+  
+  # Connecticut
+  agg_ATT_ori_CT_sub <- get_agg_ATT(Mu_trt_ori_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_ori_CT_sub <-  get_agg_ATT(Mu_trt_ori_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_space_CT_sub <- get_agg_ATT(Mu_trt_space_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_space_CT_sub <-  get_agg_ATT(Mu_trt_space_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_ICAR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_ICAR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_AR_CT_sub <- get_agg_ATT(Mu_trt_spacetime_AR_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_shrink_CT_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$ATT
+  agg_bounds_lasso_CT_sub <- get_agg_ATT(Mu_trt_lasso_CT,Y1_CT,pop_trt_CT)$CI
+  
+  agg_ATT_gsc_CT_sub <- get_agg_ATT_gsc(Mu_trt_gsc_CT,Y1_CT,pop_trt_CT,n_trt_CT,fit_gsc)$ATT
+  
+  agg_ATT_svt_CT_sub <- get_agg_ATT_svt(Mu_trt_svt_CT,Y1_CT,pop_trt_CT,n_trt_CT)$ATT
+  
+  
+  CI_fun <- function(bounds){
+    out <- paste0("(",round(bounds[1],2)," , ",round(bounds[2],2),")")
+    return(out)
+  }
+  
+  CI_ori_CA <- CI_fun(agg_bounds_ori_CA_sub)
+  CI_space_CA <- CI_fun(agg_bounds_space_CA_sub)
+  CI_ICAR_CA <- CI_fun(agg_bounds_ICAR_CA_sub)
+  CI_AR_CA <- CI_fun(agg_bounds_AR_CA_sub)
+  CI_shrink_CA <- CI_fun(agg_bounds_shrink_CA_sub)
+  CI_lasso_CA <- CI_fun(agg_bounds_lasso_CA_sub)
+  
+  CI_ori_CT <- CI_fun(agg_bounds_ori_CT_sub)
+  CI_space_CT <- CI_fun(agg_bounds_space_CT_sub)
+  CI_ICAR_CT <- CI_fun(agg_bounds_ICAR_CT_sub)
+  CI_AR_CT <- CI_fun(agg_bounds_AR_CT_sub)
+  CI_shrink_CT <- CI_fun(agg_bounds_shrink_CT_sub)
+  CI_lasso_CT <- CI_fun(agg_bounds_lasso_CT_sub)
+  
+  # Overall ATT
+  # Get indices for treated times
+  ind <- c()
+  for(i in 0:(n_trt-1)){
+    ind <- append(ind,seq((m_trt-1),m) + (i*m))
+  }
+  
+  Mu_trt_gsc <- as.vector(t(fit_gsc$Y.ct)[,(m_trt-1):m])
+  
+  Mu_trt_svt <- as.vector(t(fit_svt$X[1:(n_trt_CA + n_trt_CT),(m_trt-1):m]))
+  
+  agg_ATT_ori_sub <- get_agg_ATT(Mu_trt_ori[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_ori_sub <-  get_agg_ATT(Mu_trt_ori[,ind],Y1,pop_trt[ind])$CI
+  
+  agg_ATT_space_sub <- get_agg_ATT(Mu_trt_space[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_space_sub <-  get_agg_ATT(Mu_trt_space[,ind],Y1,pop_trt[ind])$CI
+  #agg_ATT_space_sub <- NA
+  #agg_bounds_space_sub <- NA
+  
+  agg_ATT_ICAR_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_ICAR_sub <- get_agg_ATT(Mu_trt_spacetime_ICAR[,ind],Y1,pop_trt[ind])$CI
+  #agg_ATT_ICAR_sub <- NA
+  #agg_bounds_ICAR_sub <- NA
+  
+  agg_ATT_AR_sub <- get_agg_ATT(Mu_trt_spacetime_AR[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_AR_sub <- get_agg_ATT(Mu_trt_spacetime_AR[,ind],Y1,pop_trt[ind])$CI
+  #agg_ATT_AR_sub <- NA
+  #agg_bounds_AR_sub <- NA
+  
+  agg_ATT_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_shrink_sub <- get_agg_ATT(Mu_trt_space_comb_time_shrink[,ind],Y1,pop_trt[ind])$CI
+  #agg_ATT_shrink_sub <- NA
+  #agg_bounds_shrink_sub <- NA
+  
+  agg_ATT_lasso_sub <- get_agg_ATT(Mu_trt_lasso[,ind],Y1,pop_trt[ind])$ATT
+  agg_bounds_lasso_sub <- get_agg_ATT(Mu_trt_lasso[,ind],Y1,pop_trt[ind])$CI
+  
+  agg_ATT_gsc_sub <- get_agg_ATT_gsc(Mu_trt_gsc,Y1,pop_trt[ind],n_trt,fit_gsc)$ATT
+  agg_bounds_gsc_sub <- get_agg_ATT_gsc(Mu_trt_gsc,Y1,pop_trt[ind],n_trt,fit_gsc)$CI
+  
+  agg_ATT_svt_sub <- get_agg_ATT_svt(Mu_trt_svt,Y1,pop_trt[ind],n_trt)$ATT
+  
+  CI_fun <- function(bounds){
+    out <- paste0("(",round(bounds[1],2)," , ",round(bounds[2],2),")")
+    return(out)
+  }
+  
+  CI_ori <- CI_fun(agg_bounds_ori_sub)
+  CI_space <- CI_fun(agg_bounds_space_sub)
+  CI_ICAR <- CI_fun(agg_bounds_ICAR_sub)
+  CI_AR <- CI_fun(agg_bounds_AR_sub)
+  CI_shrink <- CI_fun(agg_bounds_shrink_sub)
+  CI_lasso <- CI_fun(agg_bounds_lasso_sub)
+  CI_gsc <- CI_fun(agg_bounds_gsc_sub)
+  
+  
+  
+  
+  # Make kable table
+  Model <- c("Gsynth","SVT MC",rep("Vanilla",1),rep("Space",1),rep("Space-Time \n ICAR",1),rep("Space-Time \n AR",1), rep("Bayesian \n Lasso", 1),rep("Space-Time \n Shrinkage",1))
+  df <- cbind(Model, 
+              round(c(agg_ATT_gsc_CA_sub,agg_ATT_svt_CA_sub,agg_ATT_ori_CA_sub,agg_ATT_space_CA_sub,agg_ATT_ICAR_CA_sub,
+                      agg_ATT_AR_CA_sub,agg_ATT_lasso_CA_sub,agg_ATT_shrink_CA_sub), 2),
+              c("NA","NA",CI_ori_CA,CI_space_CA,CI_ICAR_CA,CI_AR_CA,CI_lasso_CA,CI_shrink_CA),
+              round(c(agg_ATT_gsc_CT_sub,agg_ATT_svt_CT_sub,agg_ATT_ori_CT_sub,agg_ATT_space_CT_sub,agg_ATT_ICAR_CT_sub,
+                      agg_ATT_AR_CT_sub,agg_ATT_lasso_CT_sub,agg_ATT_shrink_CT_sub), 2),
+              c("NA","NA",CI_ori_CT,CI_space_CT,CI_ICAR_CT,CI_AR_CT,CI_lasso_CT,CI_shrink_CT), 
+              round(c(agg_ATT_gsc_sub,agg_ATT_svt_sub,agg_ATT_ori_sub,agg_ATT_space_sub,agg_ATT_ICAR_sub,
+                      agg_ATT_AR_sub,agg_ATT_lasso_sub,agg_ATT_shrink_sub), 2),
+              c(CI_gsc,"NA",CI_ori,CI_space,CI_ICAR,CI_AR,CI_lasso,CI_shrink))
+  
+  rownames(df) <- NULL
+  colnames(df) <- c("Model", "ATT", "95% CI", "ATT", "95% CI", "ATT", "95% CI")
+  
+  return(df)
 }
 #---------------------------------------------------------------------------------------------
 # Function to create a table with the total ATT for CA and CT combined
@@ -1409,3 +1732,79 @@ ATT_full_plot <- function(data_full_hisp, Mu_trt, Model, trt_year, years){
   
   return(plot)
 }
+#########################################################################################
+## CV Function for choosing lambda for SVT
+## Inputs:
+## - data_full_hisp: the dataset
+## - k: number of folds for CV
+## Outputs:
+## - best_lambda
+
+svt_cv <- function(data_full_hisp,k=10) {
+  # Set up data matrix for fill.svt
+  # Convert cases into rates 
+  data_full_hisp$rate <- 100000 * (data_full_hisp$CL_CASES/data_full_hisp$POP)
+
+  # Put NAs where treated units are
+  Y0_miss <- data_full_hisp$rate
+  Y0_miss[which(data_full_hisp$C==1)] <- NA
+  Y0_miss <- matrix(Y0_miss, ncol = m, byrow=T)
+  
+  missing_data <- Y0_miss
+  
+  # Define the range of lambda values to consider
+  lambda_values <- seq(0.1, 2, by = 0.1)
+  
+  # Create an empty vector to store cross-validation error
+  cv_error <- numeric(length(lambda_values))
+  
+  # Get total elements
+  n = nrow(missing_data) * ncol(missing_data)
+  
+  # Indicator matrix of missingness
+  missing.matrix = is.na(missing_data)
+  
+  # Indices is all observed values
+  obs.idx = which(as.vector(!missing.matrix))
+  # Get observed set
+  obs.data = as.vector(missing_data)[obs.idx] # returns vector
+  
+  ## Create the k folds of the data so there is no overlap ##
+  library(caret)
+  
+  set.seed(501)
+  folds.idx <- createFolds(obs.idx, k = 10, list = TRUE, returnTrain = FALSE) # returns a list of indices corresponding to obs.idx
+  
+  for (i in 1:k) {
+    
+    # Identify indices to be removed for validation
+    remove.indices <- obs.idx[folds.idx[[i]]]
+    
+    # Select training data (put NAs where validation set is for testing)
+    train_data = as.vector(missing_data)
+    train_data[remove.indices] = NA
+    
+    # Put in matrix form
+    train_data = matrix(train_data, nrow = nrow(missing_data), byrow = F)
+    
+    for (j in 1:length(lambda_values)) {
+      # Fill missing values using SVT with current lambda value
+      filled_data <- fill.SVT(train_data, lambda = lambda_values[j])$X
+      
+      # Calculate error on validation set (sum of squared errors)
+      cv_error[j] <- cv_error[j] + sum(as.vector(filled_data)[remove.indices] - as.vector(missing_data)[remove.indices])^2
+      
+    }
+    
+  }
+  
+  # Average the errors across folds
+  cv_error <- cv_error / k
+  
+  # Choose lambda with minimum cross-validation error
+  best_lambda <- lambda_values[which.min(cv_error)]
+  
+  # Return best_lambda
+  return(best_lambda)
+}
+

@@ -22,10 +22,10 @@ k=2 # number of latent factors
 p=1 # number of covariates
 trt_year=1990 # treated year
 model=\"ICAR\" # model
-data_path=\"~/cl_quasi_exp/data/Leukemia_1983_2003_0-9.RData\" # path to application data
-adj_mat_path=\"~/cl_quasi_exp/data/leukemia_adj_mat_1983_2003_0-9.RData\" # path to adjacency matrix
-dir_out=\"~/cl_quasi_exp/Sensitivity_Analysis_1983_2003/Leukemia/Results\" # directory output path for results
+data_path=\"/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Leukemia_1983_2003_0-9.RData\" # path to application data
+adj_mat_path=\"/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/leukemia_adj_mat_1983_2003_0-9.RData\" # path to adjacency matrix
+dir_out=\"/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Sensitivity_Analysis_1983_2003/Leukemia/Results\" # directory output path for results
 
 
-R CMD BATCH --quiet --no-save --no-restore '--args wd="/n/home01/svega/cl_quasi_exp" k='$k' p='$p' trt_year='$trt_year' model='$model' data_path='$data_path' adj_mat_path='$adj_mat_path' dir_out='$dir_out'' code/1_run_models_smooth.R Rout/1_run_models_ICAR_out_smooth.Rout
+R CMD BATCH --quiet --no-save --no-restore '--args wd="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc" k='$k' p='$p' trt_year='$trt_year' model='$model' data_path='$data_path' adj_mat_path='$adj_mat_path' dir_out='$dir_out'' code/1_run_models_smooth.R Rout/1_run_models_ICAR_out_smooth.Rout
 

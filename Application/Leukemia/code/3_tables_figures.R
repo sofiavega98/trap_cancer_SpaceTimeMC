@@ -3,10 +3,10 @@
 
 years=1988:2003
 trt_year=1995 # treated year
-data_path="~/cl_quasi_exp/data/Leukemia_1988_2003_0-9.RData" # path to application data
-adj_mat_path="~/cl_quasi_exp/data/leukemia_adj_mat_1988_2003_0-9.RData" # path to adjacency matrix
-dir_out="~/cl_quasi_exp/Application/Leukemia/Results/" # directory output path for results
-dir_out_paper="~/cl_quasi_exp/Application/Leukemia/Manuscript/" # directory output path for results in manuscript
+data_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Leukemia_1988_2003_0-9.RData" # path to application data
+adj_mat_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/leukemia_adj_mat_1988_2003_0-9.RData" # path to adjacency matrix
+dir_out="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Leukemia/Results/" # directory output path for results
+dir_out_paper="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Leukemia/Manuscript/" # directory output path for results in manuscript
 
 # Load packages
 library(tidyverse)
@@ -16,8 +16,8 @@ library(matrixStats)
 library(cowplot)
 
 # Load functions
-source('~/cl_quasi_exp/Functions.R')
-source('~/cl_quasi_exp/application_functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/application_functions.R')
 
 # Load data
 load(data_path)
@@ -117,11 +117,13 @@ ATT_full_plot(data_full_hisp, res_nonSmooth$Mu_trt_AR, Model = "AR",trt_year,yea
 
 # Smooth; Model = AR
 
-ATT_full_plot(data_full_hisp, res_Smooth$Mu_trt_ICAR, Model = "AR",trt_year,years) %>%
+ATT_full_plot(data_full_hisp, res_Smooth$Mu_trt_AR, Model = "AR",trt_year,years) %>%
   ggsave(filename = paste0(dir_out_paper,"ATT_plot_AR_trt",trt_year,"_Smooth.png"),
          height = 5,
          width = 12,
          units = "in")
+
+# Non-smooth; Model = SVT
 
 
 #############################
@@ -158,6 +160,10 @@ raw_v_est_plot(data_full_hisp,pop_trt,res_Smooth$Mu_trt_lasso_smooth,treated,n_t
 raw_v_est_plot(data_full_hisp,pop_trt,res_nonSmooth$Mu_trt_shrink,treated,n_trt,m,raw)
 
 raw_v_est_plot(data_full_hisp,pop_trt,res_Smooth$Mu_trt_shrink_smooth,treated,n_trt,m,raw)
+
+raw_v_est_plot_svt(data_full_hisp,pop_trt,res_nonSmooth$fit_svt$X,treated,n_trt,m,raw)
+
+raw_v_est_plot_gsc(data_full_hisp,pop_trt,res_nonSmooth$fit_gsc,treated,n_trt,m,raw)
 
 ####################################################
 ## Make Scree-Plots to Determine k For Each Model ##

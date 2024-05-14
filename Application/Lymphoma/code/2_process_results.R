@@ -2,18 +2,19 @@
 # It also runs the application the MC through gsynth package
 
 trt_year=1995 # treated year
-data_path="~/cl_quasi_exp/data/Lymphoma_1988_2003_0-29.RData" # path to application data
-adj_mat_path="~/cl_quasi_exp/data/lymphoma_adj_mat_1988_2003_0-29.RData" # path to adjacency matrix
-dir_out="~/cl_quasi_exp/Application/Lymphoma/Results/" # directory output path for results
+data_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Lymphoma_1988_2003_0-29.RData" # path to application data
+adj_mat_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/lymphoma_adj_mat_1988_2003_0-29.RData" # path to adjacency matrix
+dir_out="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Application/Lymphoma/Results/" # directory output path for results
 
 # Load packages
 library(tidyverse)
 library(gsynth)
 library(rstan)
+library(filling)
 
 # Load functions
-source('~/cl_quasi_exp/Functions.R')
-source('~/cl_quasi_exp/application_functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/application_functions.R')
 
 # Load data
 load(data_path)
@@ -93,6 +94,84 @@ for(i in 0:(n_trt-1)){
   ind <- append(ind,seq((m_trt-1),m) + (i*m))
 }
 
+###################################
+## Filter out -1 MCMC iterations ##
+###################################
+# Dimensions for model fits are number of MCMC iterations by number of treated units
+
+# Vanilla model
+if(length(which(Mu_trt_ori == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_ori == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_ori <- Mu_trt_ori[-rows,]
+  
+}
+
+# Space model
+if(length(which(Mu_trt_space == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_space == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_space <- Mu_trt_space[-rows,]
+  
+}
+
+# ICAR model
+if(length(which(Mu_trt_ICAR == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_ICAR == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_ICAR <- Mu_trt_ICAR[-rows,]
+  
+}
+
+# AR model
+if(length(which(Mu_trt_AR == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_AR == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_AR <- Mu_trt_AR[-rows,]
+  
+}
+
+# Lasso model
+if(length(which(Mu_trt_lasso == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_lasso == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_lasso <- Mu_trt_lasso[-rows,]
+  
+}
+
+# Shrink model
+if(length(which(Mu_trt_shrink == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_shrink == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_shrink <- Mu_trt_shrink[-rows,]
+  
+}
+
+
 #################
 ## Diagnostics ##
 #################
@@ -112,12 +191,12 @@ fit_gsc <- gsynth(rate ~ C + pct_hispanic_pop, data = data_full_hisp, estimator 
                   index = c("FIPS","YEAR_DX"), force = "two-way", CV = TRUE, r = c(0, 5), 
                   se = TRUE, k=2, nboots = 1000, parallel = FALSE)
 
-
 ############################
 ## Save processed results ##
 ############################
-res <- list(Mu_trt_ori = Mu_trt_ori, Mu_trt_space = Mu_trt_space, Mu_trt_ICAR = Mu_trt_ICAR, 
-            Mu_trt_AR = Mu_trt_AR, Mu_trt_lasso = Mu_trt_lasso, Mu_trt_shrink = Mu_trt_shrink, 
-            fit_gsc = fit_gsc)
+res <- list(Mu_trt_ori_smooth = Mu_trt_ori, Mu_trt_space_smooth = Mu_trt_space, Mu_trt_ICAR_smooth = Mu_trt_ICAR, 
+            Mu_trt_AR_smooth = Mu_trt_AR, Mu_trt_lasso_smooth = Mu_trt_lasso, Mu_trt_shrink_smooth = Mu_trt_shrink, 
+            fit_gsc_smooth = fit_gsc)
+
 
 save(res, file=paste0(dir_out,"processed_res_trt",trt_year,".RData"))

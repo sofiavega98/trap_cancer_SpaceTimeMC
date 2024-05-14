@@ -27,7 +27,7 @@ parameters {
   vector[m] c0; //time-specific deviations from global intercept
   matrix[n,k] FS; //Factor scores matrix (U in the grant notation)
   matrix[m, k] L; //factor loadings matrix (V in the grant notation)
-  real<lower=0> phi; //nb scale parameter
+  real<lower=0> log_phi; //nb scale parameter
   // adding parameters for the AR(1) prior
   real alpha_AR;
   real beta_AR;
@@ -54,28 +54,33 @@ transformed parameters {
 }
 
 model {
+
   //target += -0.5 * dot_self(d0[node1]-d0[node2]); //puts a prior on d0
-  tau_ICAR ~ gamma(0.5,0.0005);
+  tau_ICAR ~ gamma(1,.01);
+  log_phi ~ normal(0, 1);
   
   // the following computes the prior on FS on the unit scale with sd = 1
   for (i in 1:k) {
-    target += -(0.5 * tau_ICAR^2) * dot_self((FS[s_node1,i])' - (FS[s_node2,i])');
+    target += (n * 0.5) * log(tau_ICAR)-(0.5 * tau_ICAR)  * dot_self((FS[s_node1,i])' - (FS[s_node2,i])');
+    sum(FS[,i]) ~ normal(0, 0.01 * N);
   }
+  
   //AR prior on L
   for (i in 1:k) {
-    L[1,i] ~ normal(0,10);
+    L[1,i] ~ normal(0,1);
     L[2:m,i] ~ normal(alpha_AR + beta_AR' * L[1:(m - 1),i],sigma_AR); //inv returns 1/x for each element
   }
   
   for(i in 1:n){
     for (j in 1:m){
-      if (1-y_miss[i,j]) y[i,j] ~ neg_binomial_2(Mu[i,j],phi); //Likelihood contribution when y isn't missing
+      if (1-y_miss[i,j]) y[i,j] ~ neg_binomial_2(Mu[i,j],exp(log_phi)); //Likelihood contribution when y isn't missing
     }
   }
 }
 
+
 generated quantities{
-  int<lower=0> Y_pred[n_exp*m]; //Compute the predictions for treated units at treated times
+  int Y_pred[n_exp*m]; //Compute the predictions for treated units at treated times
   real<lower=0> Mu_trt[n_exp*m]; //Extract the expected value for all treated units (all time periods)
   {
     int idy=0;
@@ -86,7 +91,12 @@ generated quantities{
         idz=idz+1;
         
         for (j in 1:m){
-          Y_pred[idy+1]=neg_binomial_2_rng(Mu[i,j],phi); // Calculate and save posterior prediction
+          
+          if (log(Mu[i,j])>20){ // set some reasonable threshold here
+            Y_pred[idy+1]=-1; // set to some value that you can "filter" out
+          } else {
+              Y_pred[idy+1]=neg_binomial_2_rng(Mu[i,j],exp(log_phi)); // Calculate and save posterior prediction
+          }
           idy=idy+1;
         }
       }

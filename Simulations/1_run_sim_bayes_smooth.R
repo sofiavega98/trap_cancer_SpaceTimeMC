@@ -1,5 +1,7 @@
 # This script generates simulated data and runs the data on models 1-6 from the paper
 # Generates data with "true" census pop and NM spatial matrix 
+# For this sensitivity analysis, we change the priors on tau^2. (i.e.tau^2~Ga(1,.01))
+# See Supplementary Materials.
 
 #############################################################################################################
 ## 0. Read command line arguments and load packages and functions                                          ##
@@ -11,15 +13,12 @@
 ##    - iter: number of HMC iterations                                                                     ##
 ##    - warmup: number of HMC iterations for warm-up.                                                      ##
 ##    - dir_out: directory output path for results                                                         ##
+##    - tau2: tau2 parameter
 #############################################################################################################
 
 # Read command line arguments 
 args<-commandArgs(TRUE)
 for (i in 1:length(args)) { eval (parse (text = args[[i]] )) }
-
-
-# Set seed
-seed <- 1
 
 # Load packages
 library(tidyverse)
@@ -30,7 +29,7 @@ rstan_options(auto_write = FALSE)
 library(mvtnorm)
 
 # Load functions
-source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R')
 
 # Load prespecified NM spacial and temporal adjacency matrices
 source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Simulations/0_set_up.R') # We are basing the simulated data on the values from this script
@@ -55,7 +54,7 @@ rho = rho
 gamma_sd = 0.000015
 psi_sd = 0.000015
 rate = 0.5
-tau2 = 0.01
+tau2 = tau2
 
 true_k <- true_k
 est_k <- est_k
@@ -96,6 +95,7 @@ Y1_matrix[,1] <- as.vector(t(Y1_obs))
 
 #Fit Space-Time Shrinkage model
 stan_in_1 <- stan_in[[2]] #fit is k = 7
+set.seed(501)
 fit_sim_space_comb_time_shrink <- sampling(object = space_comb_time_shrink_mod, 
                                            data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                                            pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)
@@ -105,29 +105,34 @@ stan_in_1 <- stan_in[[1]] #k=est_k
 
 
 # Fit on original model
+set.seed(501)
 fit_sim_ori <- sampling(object = original_mod, 
                         data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                         pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)
 
 
 # Fit on space model
+set.seed(501)
 fit_sim_space <- sampling(object = space_mod, 
                           data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                           pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)
 
 
 # Fit on space time ICAR model
+set.seed(501)
 fit_sim_spacetime_ICAR <- sampling(object = space_time_ICAR_mod, 
                                    data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                                    pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)
 
 
 # Fit on space time AR model
+set.seed(501)
 fit_sim_spacetime_AR <- sampling(object = space_time_AR_mod, 
                                  data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                                  pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)
 
 # Fit on lasso model
+set.seed(501)
 fit_sim_lasso <- sampling(object = lasso_mod, 
                           data = stan_in_1, chains = 1, iter = iter, warmup=warmup, 
                           pars = c('Y_pred','Mu_trt'), init_r = .1, seed = 1)

@@ -250,7 +250,7 @@ SEER_1 = SEER %>%
                                  TRUE ~ `Year of diagnosis` + 1974)
   )
 
-SEER_final = SEER_1 %>% select(fips, year_recode, `Age recode with <1 year olds`, Count) %>%
+SEER_final = SEER_1 %>% dplyr::select(fips, year_recode, `Age recode with <1 year olds`, Count) %>%
   filter(`Age recode with <1 year olds` <= 2,
          !is.na(fips),
          !is.na(year_recode)) %>%
@@ -259,7 +259,7 @@ SEER_final = SEER_1 %>% select(fips, year_recode, `Age recode with <1 year olds`
                              "1"="01-04 years",
                              "2"="05-09 years")
   ) %>%
-  select(fips, year_recode, age_recode, Count) %>%
+  dplyr::select(fips, year_recode, age_recode, Count) %>%
   group_by(fips, year_recode) %>%
   summarise(count = sum(Count)) %>%
   rename(year = year_recode) %>%
@@ -279,7 +279,7 @@ CCR_SML <- read_csv("~/cl_quasi_exp/data/CCR_SML.csv")
 
 # Subset to ages less than 9
 CA_panel <- CCR_SML %>% filter(AGE < 9) %>% 
-  select(YEARDX, CNTYFIPS)  %>% 
+  dplyr::select(YEARDX, CNTYFIPS)  %>% 
   dplyr::count(YEARDX, CNTYFIPS) %>%
   pivot_wider(names_from = YEARDX,values_from = n ) 
 # Add 0s
@@ -406,17 +406,17 @@ data_full_hisp %>%
 data_full_hisp_noZero <- data_full_hisp %>%
   filter(! FIPS %in% zero_case_FIPS)
 
-# Take out counties if there is only 1 case in the pre-treatment years
-data_full_hisp_allCA_noZero %>%
+# Take out counties if there is only 1 case or no cases in the pre-treatment years
+data_full_hisp_noZero %>%
   group_by(FIPS) %>%
   summarise(total_cases = sum(CL_CASES[which(YEAR_DX %in% seq(years[1],(trt_year-1)))])) %>%
-  filter(total_cases == 1) %>%
+  filter(total_cases <= 1) %>%
   pull(FIPS) -> zero_case_FIPS
 data_full_hisp_noZero <- data_full_hisp_noZero %>%
   filter(! FIPS %in% zero_case_FIPS)
 
 # Save final data
-save(data_full_hisp_noZero ,file = paste0('~/cl_quasi_exp/data/Leukemia_',years[1],'_',years[length(years)],'_0-9.RData'))
+save(data_full_hisp_noZero ,file = paste0('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Leukemia_',years[1],'_',years[length(years)],'_0-9.RData'))
 
 ##########################
 ## Get adjacency matrix ##
@@ -428,7 +428,12 @@ load("~/cl_quasi_exp/data/us_adj_mat.RData")
 # Subset full adjacency matrix based on data_full_hisp_noZero
 partial_us_adj_mat <- us_adj_mat[rownames(us_adj_mat)  %in%  
                                         unique(data_full_hisp_noZero$FIPS),colnames(us_adj_mat)  %in%  unique(data_full_hisp_noZero$FIPS)]
+# Re-order columns and rows to be in order of the fips in the dataset
+partial_us_adj_mat <- partial_us_adj_mat[match(unique(data_full_hisp_noZero$FIPS), colnames(partial_us_adj_mat)),
+                             match(unique(data_full_hisp_noZero$FIPS), colnames(partial_us_adj_mat))]
+
+
 # Save adjacency matrix
-save(partial_us_adj_mat,file=paste0('~/cl_quasi_exp/data/leukemia_adj_mat_',years[1],'_',years[length(years)],'_0-9.RData'))
+save(partial_us_adj_mat,file=paste0('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/leukemia_adj_mat_',years[1],'_',years[length(years)],'_0-9.RData'))
 
 

@@ -2,9 +2,10 @@
 # It also runs the application the MC through gsynth package
 
 trt_year=1990 # treated year
-data_path="~/cl_quasi_exp/data/Leukemia_1983_2003_0-9.RData" # path to application data
-adj_mat_path="~/cl_quasi_exp/data/leukemia_adj_mat_1983_2003_0-9.RData" # path to adjacency matrix
-dir_out="~/cl_quasi_exp/Sensitivity_Analysis_1983_2003/Leukemia/Results/" # directory output path for results
+data_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/Leukemia_1983_2003_0-9.RData" # path to application data
+adj_mat_path="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/data/leukemia_adj_mat_1983_2003_0-9.RData" # path to adjacency matrix
+dir_out="/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/Sensitivity_Analysis_1983_2003/Leukemia/Results/" # directory output path for results
+
 
 # Load packages
 library(tidyverse)
@@ -12,8 +13,8 @@ library(gsynth)
 library(rstan)
 
 # Load functions
-source('~/cl_quasi_exp/Functions.R')
-source('~/cl_quasi_exp/application_functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/Functions.R')
+source('/n/holylfs05/LABS/nethery_lab/Users/svega/trap_cancer_mc/functions/application_functions.R')
 
 # Load data
 load(data_path)
@@ -54,9 +55,6 @@ post_samp_spacetime_lasso<- rstan::extract(fit)  # posterior samples
 Mu_trt_lasso <- post_samp_spacetime_lasso$Y_pred # Extract Mu_trt and store results
 
 # shrinkage model
-# As of 06/19 it's not finished
-#Mu_trt_shrink <- NA
-#fit_shrink <- NA
 load(paste0(dir_out,"fit_shrink_trt",trt_year,"_k3.RData"))
 fit_shrink<- fit
 post_samp_shrink <- rstan::extract(fit)  # posterior samples 
@@ -96,6 +94,84 @@ for(i in 0:(n_trt-1)){
   ind <- append(ind,seq((m_trt-1),m) + (i*m))
 }
 
+###################################
+## Filter out -1 MCMC iterations ##
+###################################
+# Dimensions for model fits are number of MCMC iterations by number of treated units
+
+# Vanilla model
+if(length(which(Mu_trt_ori == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_ori == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_ori <- Mu_trt_ori[-rows,]
+  
+}
+
+# Space model
+if(length(which(Mu_trt_space == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_space == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_space <- Mu_trt_space[-rows,]
+  
+}
+
+# ICAR model
+if(length(which(Mu_trt_ICAR == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_ICAR == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_ICAR <- Mu_trt_ICAR[-rows,]
+  
+}
+
+# AR model
+if(length(which(Mu_trt_AR == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_AR == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_AR <- Mu_trt_AR[-rows,]
+  
+}
+
+# Lasso model
+if(length(which(Mu_trt_lasso == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_lasso == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_lasso <- Mu_trt_lasso[-rows,]
+  
+}
+
+# Shrink model
+if(length(which(Mu_trt_shrink == -1)) > 0){
+  
+  # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+  rows <- which(Mu_trt_shrink == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+  
+  # Filter out
+  print("filtering")
+  Mu_trt_shrink <- Mu_trt_shrink[-rows,]
+  
+}
+
+
 #################
 ## Diagnostics ##
 #################
@@ -119,8 +195,9 @@ fit_gsc <- gsynth(rate ~ C + pct_hispanic_pop, data = data_full_hisp, estimator 
 ############################
 ## Save processed results ##
 ############################
-res <- list(Mu_trt_ori = Mu_trt_ori, Mu_trt_space = Mu_trt_space, Mu_trt_ICAR = Mu_trt_ICAR, 
-            Mu_trt_AR = Mu_trt_AR, Mu_trt_lasso = Mu_trt_lasso, Mu_trt_shrink = Mu_trt_shrink, 
-            fit_gsc = fit_gsc)
+res <- list(Mu_trt_ori_smooth = Mu_trt_ori, Mu_trt_space_smooth = Mu_trt_space, Mu_trt_ICAR_smooth = Mu_trt_ICAR, 
+            Mu_trt_AR_smooth = Mu_trt_AR, Mu_trt_lasso_smooth = Mu_trt_lasso, Mu_trt_shrink_smooth = Mu_trt_shrink, 
+            fit_gsc_smooth = fit_gsc)
+
 
 save(res, file=paste0(dir_out,"processed_res_trt",trt_year,".RData"))

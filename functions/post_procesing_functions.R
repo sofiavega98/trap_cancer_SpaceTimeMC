@@ -824,11 +824,9 @@ raw_v_est_plot_sim_gsc <- function(data=NM_new,pop_trt,gsc_Mu,Y0_matrix,n_exp) {
 }
 
 ##---------------------------------------------------------------------------------------------------
-
 ## Check Convergence of Models
 # k in 1,3,7
 # our six models
-
 conv_vec <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_spacetime_AR_1,Mu_trt_lasso_1,
                      Mu_trt_ori_3,Mu_trt_space_3,Mu_trt_spacetime_ICAR_3,Mu_trt_spacetime_AR_3,Mu_trt_lasso_3,
                      Mu_trt_ori_7,Mu_trt_space_7,Mu_trt_spacetime_ICAR_7,Mu_trt_spacetime_AR_7,Mu_trt_lasso_7,
@@ -978,6 +976,157 @@ conv_vec <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_
   
 }
 
+## Check Convergence of Models
+# k in 1,3,7
+# our six models
+conv_vec <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_spacetime_AR_1,Mu_trt_lasso_1,
+                     Mu_trt_ori_3,Mu_trt_space_3,Mu_trt_spacetime_ICAR_3,Mu_trt_spacetime_AR_3,Mu_trt_lasso_3,
+                     Mu_trt_ori_7,Mu_trt_space_7,Mu_trt_spacetime_ICAR_7,Mu_trt_spacetime_AR_7,Mu_trt_lasso_7,
+                     Mu_trt_space_comb_time_shrink_7){
+  
+  ## k = 1
+  ori_1 <- c()
+  for(i in 1:length(Mu_trt_ori_1)){
+    if(length(unique(which(is.na(Mu_trt_ori_1[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      ori_1[i] <- 1
+    }
+  }
+  ori_conv_1 <- sum(ori_1,na.rm = T)
+  
+  space_1 <- c()
+  for(i in 1:length(Mu_trt_space_1)){
+    if(length(unique(which(is.na(Mu_trt_space_1[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      space_1[i] <- 1
+    }
+  }
+  space_conv_1 <- sum(space_1,na.rm = T)
+  
+  spacetime_ICAR_1 <- c()
+  for(i in 1:length(Mu_trt_spacetime_ICAR_1)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_ICAR_1[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_ICAR_1[i] <- 1
+    }
+  }
+  spacetime_ICAR_conv_1 <- sum(spacetime_ICAR_1,na.rm = T)
+  
+  spacetime_AR_1 <- c()
+  for(i in 1:length(Mu_trt_spacetime_AR_1)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_AR_1[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_AR_1[i] <- 1
+    }
+  }
+  spacetime_AR_conv_1 <- sum(spacetime_AR_1,na.rm = T)
+  
+  lasso_1 <- c()
+  for(i in 1:length(Mu_trt_lasso_1)){
+    if(length(unique(which(is.na(Mu_trt_lasso_1[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      lasso_1[i] <- 1
+    }
+  }
+  lasso_conv_1 <- sum(lasso_1,na.rm = T)
+  
+  ## k = 3
+  ori_3 <- c()
+  for(i in 1:length(Mu_trt_ori_3)){
+    if(length(unique(which(is.na(Mu_trt_ori_3[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      ori_3[i] <- 1
+    }
+  }
+  ori_conv_3 <- sum(ori_3,na.rm = T)
+  
+  space_3 <- c()
+  for(i in 1:length(Mu_trt_space_3)){
+    if(length(unique(which(is.na(Mu_trt_space_3[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      space_3[i] <- 1
+    }
+  }
+  space_conv_3 <- sum(space_3,na.rm = T)
+  
+  spacetime_ICAR_3 <- c()
+  for(i in 1:length(Mu_trt_spacetime_ICAR_3)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_ICAR_3[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_ICAR_3[i] <- 1
+    }
+  }
+  spacetime_ICAR_conv_3 <- sum(spacetime_ICAR_3,na.rm = T)
+  
+  spacetime_AR_3 <- c()
+  for(i in 1:length(Mu_trt_spacetime_AR_3)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_AR_3[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_AR_3[i] <- 1
+    }
+  }
+  spacetime_AR_conv_3 <- sum(spacetime_AR_3,na.rm = T)
+  
+  lasso_3 <- c()
+  for(i in 1:length(Mu_trt_lasso_3)){
+    if(length(unique(which(is.na(Mu_trt_lasso_3[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      lasso_3[i] <- 1
+    }
+  }
+  lasso_conv_3 <- sum(lasso_3,na.rm = T)
+  
+  ## k = 7
+  ori_7 <- c()
+  for(i in 1:length(Mu_trt_ori_7)){
+    if(length(unique(which(is.na(Mu_trt_ori_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      ori_7[i] <- 1
+    }
+  }
+  ori_conv_7 <- sum(ori_7,na.rm = T)
+  
+  space_7 <- c()
+  for(i in 1:length(Mu_trt_space_7)){
+    if(length(unique(which(is.na(Mu_trt_space_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      space_7[i] <- 1
+    }
+  }
+  space_conv_7 <- sum(space_7,na.rm = T)
+  
+  spacetime_ICAR_7 <- c()
+  for(i in 1:length(Mu_trt_spacetime_ICAR_7)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_ICAR_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_ICAR_7[i] <- 1
+    }
+  }
+  spacetime_ICAR_conv_7 <- sum(spacetime_ICAR_7,na.rm = T)
+  
+  spacetime_AR_7 <- c()
+  for(i in 1:length(Mu_trt_spacetime_AR_7)){
+    if(length(unique(which(is.na(Mu_trt_spacetime_AR_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_AR_7[i] <- 1
+    }
+  }
+  spacetime_AR_conv_7 <- sum(spacetime_AR_7,na.rm = T)
+  
+  lasso_7 <- c()
+  for(i in 1:length(Mu_trt_lasso_7)){
+    if(length(unique(which(is.na(Mu_trt_lasso_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      lasso_7[i] <- 1
+    }
+  }
+  lasso_conv_7 <- sum(lasso_7,na.rm = T)
+  
+  spacetime_shrink <- c()
+  for(i in 1:length(Mu_trt_space_comb_time_shrink_7)){
+    if(length(unique(which(is.na(Mu_trt_space_comb_time_shrink_7[[i]])*1 == 1, arr.ind = TRUE))) > 0){
+      spacetime_shrink[i] <- 1
+    }
+  }
+  spacetime_shrink_conv <- sum(spacetime_shrink,na.rm = T)
+  
+  ## Make Table
+  k <- c(rep("k=1",5),rep("k=3",5),rep("k=7",6))
+  Model <- c("Original","Space","Space-Time \n ICAR","Space-Time \n AR(1)","Shrinkage \n Lasso","Original","Space","Space-Time \n ICAR","Space-Time \n AR(1)","Shrinkage \n Lasso","Original","Space","Space-Time \n ICAR","Space-Time \n AR(1)","Shrinkage \n Lasso","Space-Time \n Shrinkage")
+  conv <- c(ori_conv_1,space_conv_1,spacetime_ICAR_conv_1,spacetime_AR_conv_1,lasso_conv_1,
+            ori_conv_3,space_conv_3,spacetime_ICAR_conv_3,spacetime_AR_conv_3,lasso_conv_3,
+            ori_conv_7,space_conv_7,spacetime_ICAR_conv_7,spacetime_AR_conv_7,lasso_conv_7,spacetime_shrink_conv)/100*100
+  
+  conv_vec <- cbind(k,Model,conv)
+  
+  return(conv_vec)
+  
+}
 
 
 conv_table <- function(Mu_trt_ori_1,Mu_trt_space_1,Mu_trt_spacetime_ICAR_1,Mu_trt_spacetime_AR_1,Mu_trt_lasso_1,
@@ -2491,6 +2640,8 @@ meanAbsPercBiasATT_county_plot <- function(Y0_matrix_1,Mu_trt_ori_1,Mu_trt_space
 medianAbsPercBiasY0_year <- function(Mu_trt,Y0_matrix,ind){
   medianAbsPercBias <- c()
   for(i in 1:length(Mu_trt)){
+  #for(i in c(seq(1:83),seq(85,99))){
+    #print(i)
     # Find true year mean rate
     Y0_rate <- (Y0_matrix[ind,i]/pop_trt[ind]) * 100000 # Find Rate
     true_Y0_median_rate <- colMeans(matrix(Y0_rate , ncol = 7, byrow = T)) # take mean across years
@@ -2511,10 +2662,11 @@ medianAbsPercBiasY0_year <- function(Mu_trt,Y0_matrix,ind){
   }
   
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
   
-  return(list(median = median, LB = LB, UB = UB))
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
 }
 
 #--------------------------------------------------------------------------------------------
@@ -2525,6 +2677,7 @@ medianAbsPercBiasY0_year <- function(Mu_trt,Y0_matrix,ind){
 medianAbsPercBiasATT_year <- function(Mu_trt,Y0_matrix,Y1_matrix, true_trt_effect, ind){
   medianAbsPercBias <- c()
   for(i in 1:length(Mu_trt)){
+  #for(i in c(seq(1:83),seq(85,99))){
     # Find true treatment effect rate
     true_trt_effect_rate <- (true_trt_effect/pop_trt[ind] * 100000)[,i]# Find Rate
     # Take average across counties for each time point
@@ -2547,10 +2700,11 @@ medianAbsPercBiasATT_year <- function(Mu_trt,Y0_matrix,Y1_matrix, true_trt_effec
     medianAbsPercBias[i] <- median(absPercBias,na.rm = T)
   }
   median <- median(medianAbsPercBias)
-  LB <- quantile(medianAbsPercBias, probs = 0.05, na.rm = T)
-  UB <- quantile(medianAbsPercBias, probs = 0.95, na.rm = T)
+  LB <- quantile(medianAbsPercBias, probs = 0.25, na.rm = T)
+  UB <- quantile(medianAbsPercBias, probs = 0.75, na.rm = T)
+  IQR <- IQR(medianAbsPercBias)
   
-  return(list(median = median, LB = LB, UB = UB))
+  return(list(median = median, LB = LB, UB = UB, IQR = IQR))
 }
 
 ## Function for GSC
@@ -2587,5 +2741,21 @@ medianAbsPercBiasATT_year_gsc <- function(fit_gsc,Y0_matrix,Y1_matrix,true_trt_e
   return(list(median = median, LB = LB, UB = UB))
 }
 
+## Function to filter out -1s
+filtering <- function(Y_pred){
+  for(i in 1:length(Y_pred)){
+    if(length(which(Y_pred[[i]] == -1)) > 0){
+      
+      # Identify the rows -1s (identify which MCMC iteration has the overflow problem)
+      rows <- which(Y_pred[[i]] == -1, arr.ind = TRUE)[,1] #[,1] since first column of the which statement identify rows
+      
+      # Filter out
+      print("filtering")
+      Y_pred[[i]] <- Y_pred[[i]][-rows,]
+      
+    }
+  }
+  return(Y_pred)
+}
 
 
